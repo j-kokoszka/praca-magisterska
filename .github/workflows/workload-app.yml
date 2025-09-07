@@ -11,20 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      # 1. Checkout the repository
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      # 2. Set up Python 3.11
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Install Poetry
-      run: pip install poetry
+      # 3. Install Poetry
+      - name: Install Poetry
+        run: pip install poetry
 
-    - name: Install dependencies
-      run: poetry install --no-root
+      # 4. Install dependencies in workload-app
+      - name: Install dependencies
+        working-directory: experiments/workload-app
+        run: poetry install --no-root
 
-    - name: Run tests
-      run: poetry run pytest
-
+      # 5. Run tests in workload-app/tests
+      - name: Run tests
+        working-directory: experiments/workload-app
+        run: poetry run pytest tests
 
