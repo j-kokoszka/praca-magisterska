@@ -1,0 +1,39 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Poetry
+poetry.lock
+
+# Pytest
+.pytest_cache/
+
+# mypy type checking
+.mypy_cache/
+.dmypy.json
+
+# Uvicorn / FastAPI logs
+*.log
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
