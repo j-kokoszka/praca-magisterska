@@ -7,7 +7,6 @@ import time
 
 app = FastAPI()
 
-
 @app.get("/cpu")
 def cpu_intensive(loops: int = 1000000):
     """

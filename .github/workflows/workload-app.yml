@@ -34,8 +34,8 @@ jobs:
         working-directory: experiments/workload-app
         run: poetry install --no-root
 
-      # 5. Run tests
+      # 5. Run tests with PYTHONPATH
       - name: Run tests
         working-directory: experiments/workload-app
-        run: poetry run pytest tests
+        run: PYTHONPATH=$(pwd) poetry run pytest tests
 
