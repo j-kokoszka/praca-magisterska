@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
+      # 1. Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -29,12 +29,12 @@ jobs:
       - name: Install Poetry
         run: pip install poetry
 
-      # 4. Install dependencies in workload-app
+      # 4. Install dependencies for workload-app
       - name: Install dependencies
         working-directory: experiments/workload-app
         run: poetry install --no-root
 
-      # 5. Run tests in workload-app/tests
+      # 5. Run tests
       - name: Run tests
         working-directory: experiments/workload-app
         run: poetry run pytest tests
