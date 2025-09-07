@@ -3,15 +3,19 @@ name: Python FastAPI CI
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'experiments/workload-app/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'experiments/workload-app/**'
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository
+      # 1. Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v3
 
