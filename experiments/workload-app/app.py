@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 import hashlib
 import numpy as np
 import os
@@ -6,6 +7,8 @@ import tempfile
 import time
 
 app = FastAPI()
+
+Instrumentator().instrument(app).expose(app)
 
 @app.get("/cpu")
 def cpu_intensive(loops: int = 1000000):
