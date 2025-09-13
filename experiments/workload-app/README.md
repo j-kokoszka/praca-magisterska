@@ -1,5 +1,5 @@
 # Workload App
-
+ 
 A simple application to generate CPU, memory, and I/O load for testing autoscaling mechanisms in Kubernetes.
 Can be used to test HPA, VPA, KEDA, or custom MAPE-K controllers.
 
