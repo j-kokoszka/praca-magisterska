@@ -1,0 +1,41 @@
+name: Compile LaTeX to PDF
+
+on:
+  # Uruchamia workflow przy każdym pushu do głównej gałęzi (np. main lub master)
+  push:
+    branches:
+      - main
+  # Pozwala na manualne uruchomienie workflow z poziomu GitHub UI
+  workflow_dispatch:
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Krok 1: Pobranie kodu z repozytorium
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Krok 2: Kompilacja pliku LaTeX do PDF
+      # Akcja xu-cheng/latex-action używa domyślnie pdflatex
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          # Ustawia katalog roboczy, gdzie znajduje się kod LaTeX
+          working_directory: latex/
+          # Nazwa głównego pliku .tex do skompilowania
+          # Zmień "main.tex" na rzeczywistą nazwę Twojego głównego pliku
+          root_file: main.tex 
+      
+      # Krok 3: Przesłanie wygenerowanego pliku PDF jako Artifact
+      # Plik PDF zostanie wygenerowany w katalogu "latex/" i będzie miał nazwę "main.pdf"
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Nazwa, pod jaką plik będzie widoczny w Artifacts
+          name: PDF_Document
+          # Ścieżka do wygenerowanego pliku PDF
+          path: latex/praca-magisterska.pdf
+          # Czas przechowywania artefaktu (opcjonalne, domyślnie 90 dni)
+          retention-days: 7

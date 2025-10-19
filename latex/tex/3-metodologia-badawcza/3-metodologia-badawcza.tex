@@ -1,0 +1,124 @@
+\newpage
+\section{Metodologia Badawcza}
+Niniejszy rozdział poświęcony jest szczegółowemu opisowi metodologii badawczej przyjętej w pracy magisterskiej. Celem jest zapewnienie transparentności i powtarzalności przeprowadzonych eksperymentów, a także umożliwienie obiektywnej oceny uzyskanych wyników. Zaprezentowana metodologia stanowi kompleksowe podejście do weryfikacji postawionych hipotez badawczych oraz odpowiedzi na zdefiniowane problemy. Rozdział rozpoczyna się od precyzyjnego sformułowania problemu badawczego i szczegółowych pytań badawczych, które wyznaczają kierunek empirycznej części pracy. Następnie omówione zostaną kluczowe aspekty projektowania eksperymentów, w tym wybór odpowiednich metryk, scenariuszy obciążenia oraz specyfika środowiska testowego. Całość ma na celu stworzenie solidnych ram dla rzetelnej analizy wydajności i efektywności autonomicznych pętli sterowania w środowisku Kubernetes.
+
+\subsection{Sformułowanie problemu badawczego i pytań badawczych (szczegółowo)}
+Głównym problemem badawczym, do którego rozwiązania dąży niniejsza praca, jest określenie optymalnych strategii autonomicznego zarządzania cyklem życia usług w środowisku Kubernetes, ze szczególnym uwzględnieniem mechanizmów skalowania i alokacji zasobów. W kontekście rosnącej złożoności aplikacji rozproszonych i potrzeby minimalizacji interwencji ludzkiej, kluczowe staje się zrozumienie, w jaki sposób istniejące rozwiązania radzą sobie z dynamicznie zmieniającymi się warunkami obciążenia oraz czy autorskie podejście, oparte na modelu MAPE-K, może zaoferować wyższą efektywność i adaptacyjność. Problem ten dotyka bezpośrednio wyzwań związanych z utrzymaniem wysokiej dostępności, optymalnego wykorzystania zasobów oraz obniżeniem kosztów operacyjnych w nowoczesnych architekturach chmurowych.
+
+W celu rozwiązania postawionego problemu badawczego, sformułowano następujące szczegółowe pytania badawcze:
+\begin{enumerate}
+    \item \textbf{Charakterystyka i Ograniczenia Istniejących Mechanizmów}: W jaki sposób Vertical Pod Autoscaler (VPA), Horizontal Pod Autoscaler (HPA) oraz Kubernetes Event-driven Autoscaling (KEDA) reagują na różnorodne, dynamiczne wzorce obciążenia (np. narastające obciążenie, obciążenie szczytowe, obciążenie zmienne cyklicznie) w kontekście efektywności alokacji zasobów (CPU, pamięć) i stabilności usług (opóźnienia, błędy)? Jakie są ich fundamentalne ograniczenia w zakresie proaktywnego skalowania i optymalizacji, które wynikają z ich wewnętrznych zasad działania?
+    \item \textbf{Wydajność i Adaptacyjność Rozwiązania MAPE-K}: Czy autorskie rozwiązanie autonomicznej pętli sterującej, zaprojektowane i zaimplementowane w oparciu o model MAPE-K, jest w stanie osiągnąć wyższą efektywność wykorzystania zasobów oraz lepszą responsywność (np. niższe średnie i maksymalne opóźnienia) aplikacji w środowisku Kubernetes w porównaniu do VPA, HPA i KEDA, szczególnie w scenariuszach wymagających zaawansowanej predykcji i koordynacji decyzji?
+    \item \textbf{Wpływ Bazy Wiedzy na Efektywność MAPE-K}: W jakim stopniu komponent bazy wiedzy w architekturze MAPE-K, integrujący historyczne dane o wydajności i predefiniowane polityki adaptacji, przyczynia się do poprawy jakości decyzji podejmowanych przez pętlę sterującą oraz do długoterminowej optymalizacji działania systemu w porównaniu do podejść czysto reaktywnych?
+    \item \textbf{Kryteria Oceny i Metryki Sukcesu}: Jakie kluczowe metryki wydajnościowe (np. średnie zużycie CPU/RAM, procent niewykorzystanych zasobów, czasy odpowiedzi, przepustowość, liczba błędów) oraz wskaźniki operacyjne (np. liczba restartów Podów, stabilność skalowania) należy zastosować, aby obiektywnie porównać skuteczność działania VPA, HPA, KEDA oraz autorskiego rozwiązania MAPE-K w kontrolowanych warunkach eksperymentalnych?
+\end{enumerate}
+
+\subsection{Projektowanie eksperymentów}
+Projektowanie eksperymentów stanowi kluczowy etap niniejszej pracy magisterskiej, mający na celu systematyczną i powtarzalną weryfikację postawionych hipotez oraz udzielenie odpowiedzi na zdefiniowane problemy badawcze. Celem jest obiektywna ocena wydajności, efektywności oraz zachowania autonomicznych mechanizmów skalowania w środowisku Kubernetes. Eksperymenty zostaną zaprojektowane tak, aby umożliwić bezpośrednie porównanie działania istniejących rozwiązań (VPA, HPA, KEDA) z autorskim podejściem opartym na modelu MAPE-K, w kontrolowanych warunkach obciążenia.
+
+\subsubsection{Wybór metryk oceny (np. wykorzystanie zasobów, opóźnienia, przepustowość)}
+Aby rzetelnie ocenić skuteczność poszczególnych mechanizmów autoskalowania, konieczny jest precyzyjny wybór obiektywnych i mierzalnych metryk. W ramach niniejszych badań zostaną uwzględnione następujące kategorie metryk, które pozwolą na wieloaspektową analizę:
+
+\begin{enumerate}
+    \item \textbf{Metryki efektywności wykorzystania zasobów:}
+    \begin{itemize}
+        \item \textbf{Średnie i maksymalne zużycie CPU (\%):} Procentowe wykorzystanie procesora przez Pody w stosunku do przydzielonych im zasobów. Wysokie zużycie przy niskim marginesie błędu świadczy o efektywnym wykorzystaniu.
+        \item \textbf{Średnie i maksymalne zużycie pamięci (MiB/\%):} Analogicznie, pomiar wykorzystania pamięci.
+        \item \textbf{Współczynnik marnotrawstwa zasobów (\%):} Obliczony jako stosunek niewykorzystanych, ale przydzielonych zasobów do całkowitej ilości przydzielonych zasobów. Niższy współczynnik wskazuje na lepszą optymalizację.
+        \item \textbf{Liczba alokowanych vs. faktycznie wykorzystanych zasobów:} Analiza różnic między zasobami żądanymi (requests) i limitowanymi (limits) a rzeczywistym zużyciem.
+    \end{itemize}
+    \item \textbf{Metryki wydajności usług (Quality of Service - QoS):}
+    \begin{itemize}
+        \item \textbf{Średni i maksymalny czas odpowiedzi (Response Time - RT):} Mierzone w milisekundach, od momentu wysłania żądania do otrzymania odpowiedzi. Niższy czas odpowiedzi wskazuje na lepszą responsywność.
+        \item \textbf{Przepustowość (Throughput):} Liczba zrealizowanych operacji (np. żądań HTTP) na jednostkę czasu. Wyższa przepustowość oznacza większą zdolność systemu do obsługi obciążenia.
+        \item \textbf{Wskaźnik błędów (\%):} Procent nieudanych żądań lub operacji w stosunku do całkowitej liczby. Niższy wskaźnik świadczy o stabilności.
+        \item \textbf{P95/P99 czasu odpowiedzi:} 95. i 99. percentyl czasu odpowiedzi, wskazujący na doświadczenia większości użytkowników i skalę problemów dla marginalnej grupy.
+    \end{itemize}
+    \item \textbf{Metryki operacyjne i stabilności:}
+    \begin{itemize}
+        \item \textbf{Liczba skalowań (up/down):} Częstotliwość zmian liczby replik lub zasobów, co może świadczyć o stabilności lub "chwiejności" autoskalera.
+        \item \textbf{Liczba restartów Podów:} Dotyczy VPA, gdzie zmiana zasobów może wymagać restartu, co wpływa na dostępność.
+        \item \textbf{Czas stabilizacji po zmianie obciążenia:} Czas potrzebny systemowi na osiągnięcie stabilnego stanu (np. powrót metryk do pożądanych wartości) po gwałtownej zmianie obciążenia.
+    \end{itemize}
+\end{enumerate}
+Zebrane dane zostaną poddane analizie statystycznej w celu wyciągnięcia wiarygodnych wniosków.
+
+\subsubsection{Scenariusze obciążenia i symulacje}
+Aby zapewnić kompleksową ocenę i porównanie mechanizmów skalowania, eksperymenty zostaną przeprowadzone z wykorzystaniem różnorodnych, realistycznych \textbf{scenariuszy obciążenia}. Scenariusze te mają za zadanie odzwierciedlać typowe wzorce ruchu występujące w rzeczywistych środowiskach produkcyjnych, a także testować odporność systemów na nagłe i ekstremalne zmiany. Planuje się zastosowanie następujących typów obciążenia:
+
+\begin{itemize}
+    \item \textbf{Obciążenie stałe (Constant Load):} Utrzymywanie stabilnego, umiarkowanego obciążenia przez dłuższy czas, w celu oceny efektywności bazowej alokacji zasobów i stabilności działania autoskalerów.
+    \item \textbf{Obciążenie narastające (Ramp-up Load):} Stopniowe zwiększanie obciążenia, aby zbadać zdolność autoskalerów do adaptacji i skalowania w górę w miarę wzrostu zapotrzebowania.
+    \item \textbf{Obciążenie szczytowe (Peak Load):} Gwałtowny i wysoki wzrost obciążenia (tzw. "spike"), mający na celu przetestowanie szybkości reakcji i odporności mechanizmów na nagłe, intensywne zapotrzebowanie.
+    \item \textbf{Obciążenie zmienne cyklicznie (Cyclic/Diurnal Load):} Symulacja wzorców ruchu charakterystycznych dla cykli dobowych lub tygodniowych (np. niższe obciążenie w nocy, wyższe w ciągu dnia), w celu oceny zdolności autoskalerów do efektywnego skalowania zarówno w górę, jak i w dół.
+    \item \textbf{Obciążenie ze zmiennymi wzorcami dostępu (Varying Access Patterns):} Złożone scenariusze, które mogą symulować różne typy operacji (np. odczyty vs. zapisy w bazie danych), aby ocenić, jak mechanizmy radzą sobie z różnorodnym zapotrzebowaniem na zasoby.
+\end{itemize}
+Każdy scenariusz zostanie powtórzony wielokrotnie w celu zapewnienia wiarygodności statystycznej wyników.
+
+\subsubsection{Narzędzia i środowisko eksperymentalne (np. klaster Kubernetes, narzędzia do monitorowania, generatory obciążenia)}
+Przeprowadzenie rzetelnych eksperymentów wymaga odpowiednio skonfigurowanego środowiska testowego oraz zestawu narzędzi. W niniejszej pracy zostanie wykorzystany następujący zestaw zasobów:
+
+\begin{itemize}
+    \item \textbf{Klaster Kubernetes:} Do wdrożenia testowanych aplikacji i mechanizmów skalowania zostanie zbudowany dedykowany klaster Kubernetes. Rozważane są opcje wdrożenia na maszynach wirtualnych w chmurze publicznej (np. Google Kubernetes Engine - GKE, Amazon Elastic Kubernetes Service - EKS) lub w lokalnym środowisku wirtualnym (np. za pomocą narzędzi takich jak Kind, Kubeadm), z uwzględnieniem skalowalności i dostępności zasobów. Klaster zostanie skonfigurowany z wymaganymi komponentami, takimi jak Metrics Server, oraz odpowiednimi wersjami VPA, HPA i KEDA.
+    \item \textbf{Aplikacja testowa:} Zostanie zaimplementowana dedykowana aplikacja testowa, o kontrolowanym profilu zużycia zasobów i charakterystyce odpowiedzi, która będzie symulować rzeczywiste obciążenie. Aplikacja ta będzie wystawiona jako usługa w Kubernetesie, aby mogła być skalowana przez testowane mechanizmy. Przykładowo, może to być prosta aplikacja webowa generująca obciążenie CPU/RAM na podstawie parametrów żądania, lub aplikacja oparta na kolejkach wiadomości.
+    \item \textbf{Generatory obciążenia (Load Generators):} Do generowania kontrolowanego ruchu i symulacji scenariuszy obciążenia zostaną użyte narzędzia takie jak Apache JMeter, K6, Locust lub wrk. Narzędzia te pozwolą na precyzyjne sterowanie liczbą współbieżnych użytkowników, liczbą żądań na sekundę oraz wzorcami dostępu, co umożliwi odwzorowanie zdefiniowanych scenariuszy.
+    \item \textbf{Narzędzia do monitorowania i zbierania metryk:} Klaster zostanie wyposażony w system monitorujący do zbierania danych o wydajności i zużyciu zasobów. Rozważane jest wykorzystanie stosu \textbf{Prometheus} (do zbierania metryk), \textbf{Grafana} (do wizualizacji danych) oraz \textbf{Loki} (do agregacji logów). Dodatkowo, do zbierania specyficznych danych o działaniu Podów i autoskalerów wykorzystane zostanie API Kubernetesa oraz narzędzia wiersza poleceń.
+    \item \textbf{Środowisko programistyczne dla rozwiązania MAPE-K:} Dla implementacji autorskiego rozwiązania MAPE-K zostanie wykorzystany język programowania (np. Go, Python) i biblioteki do interakcji z API Kubernetesa.
+\end{itemize}
+Szczegółowa konfiguracja każdego z narzędzi i komponentów środowiska testowego zostanie opisana w dalszej części pracy, zapewniając pełną transparentność metodologii.
+
+
+\subsection{Metody analizy danych}
+Po zakończeniu fazy gromadzenia danych z przeprowadzonych eksperymentów, kluczowe jest zastosowanie odpowiednich metod analizy, które umożliwią wyciągnięcie wiarygodnych wniosków i weryfikację postawionych hipotez badawczych. Proces analizy danych będzie obejmował zarówno podejścia ilościowe, jak i jakościowe, a także wykorzystanie specjalistycznych narzędzi do wizualizacji i interpretacji wyników. Celem jest nie tylko stwierdzenie różnic w wydajności poszczególnych mechanizmów skalowania, ale również zrozumienie przyczyn obserwowanych zachowań.
+
+\subsubsection{Analiza ilościowa i jakościowa}
+Analiza danych zostanie przeprowadzona dwutorowo, łącząc metody ilościowe i jakościowe w celu uzyskania kompleksowego obrazu funkcjonowania badanych mechanizmów:
+
+\begin{enumerate}
+    \item \textbf{Analiza Ilościowa:} Będzie stanowiła podstawę weryfikacji hipotez i opierać się na statystycznym przetwarzaniu zebranych metryk numerycznych. Kluczowe aspekty analizy ilościowej obejmują:
+    \begin{itemize}
+        \item \textbf{Statystyka opisowa:} Obliczenie średnich, median, odchyleń standardowych, minimum i maksimum dla wszystkich zebranych metryk (np. czasu odpowiedzi, zużycia CPU, przepustowości). Pozwoli to na wstępne scharakteryzowanie danych i identyfikację rozkładów.
+        \item \textbf{Analiza trendów:} Badanie zmian metryk w czasie dla różnych scenariuszy obciążenia, co pozwoli na ocenę dynamiki reakcji każdego autoskalera.
+        \item \textbf{Analiza korelacji:} Zbadanie związków między różnymi metrykami (np. między obciążeniem a czasem odpowiedzi, lub między liczbą Podów a zużyciem zasobów).
+        \item \textbf{Testy porównawcze:} Zastosowanie odpowiednich testów statystycznych (np. testów t-Studenta, analizy wariancji ANOVA) do porównania średnich wartości metryk między poszczególnymi mechanizmami skalowania (VPA, HPA, KEDA, MAPE-K) w celu określenia istotności statystycznej obserwowanych różnic.
+        \item \textbf{Analiza percentylowa:} Obliczenie percentyli (np. P95, P99) dla metryk wydajności, co jest kluczowe dla oceny doświadczeń użytkowników i identyfikacji ewentualnych anomalii lub "ogonów" rozkładu.
+    \end{itemize}
+    \item \textbf{Analiza Jakościowa:} Uzupełni analizę ilościową, dostarczając głębszego zrozumienia przyczyn obserwowanych zachowań, zwłaszcza w przypadku anomalii lub niespodziewanych wyników. Obejmie ona:
+    \begin{itemize}
+        \item \textbf{Analiza logów systemowych i zdarzeń Kubernetesa:} Przeglądanie logów z komponentów autoskalerów, kubeleta i kontrolera Kubernetes w celu zidentyfikowania konkretnych decyzji, błędów lub zdarzeń, które mogły wpłynąć na zachowanie systemu.
+        \item \textbf{Analiza konfiguracji i polityk:} Szczegółowa ocena, jak specyficzne konfiguracje i algorytmy każdego autoskalera wpływały na jego reakcje w danych scenariuszach.
+        \item \textbf{Studia przypadków (Case Studies):} Wybór konkretnych, interesujących momentów w przebiegu eksperymentów (np. nagłe skoki obciążenia, awarie, momenty stabilizacji) i ich dogłębna analiza jakościowa w celu wyjaśnienia obserwowanych zjawisk.
+    \end{itemize}
+\end{enumerate}
+Połączenie obu podejść pozwoli na kompleksową interpretację wyników, łącząc precyzję danych numerycznych z kontekstualnym zrozumieniem mechanizmów działania.
+
+\subsubsection{Narzędzia do wizualizacji i interpretacji wyników}
+Efektywna wizualizacja danych jest niezbędna do szybkiego zrozumienia złożonych zbiorów danych i komunikowania wyników badań. Do wizualizacji i interpretacji wyników eksperymentów zostaną wykorzystane następujące narzędzia:
+
+\begin{itemize}
+    \item \textbf{Grafana:} To narzędzie typu open-source do tworzenia interaktywnych dashboardów. Zostanie użyta do wizualizacji metryk czasowych (np. zużycie CPU/RAM w funkcji czasu, liczba replik, czasy odpowiedzi) zbieranych z Prometheus. Pozwoli to na dynamiczne śledzenie zmian i porównywanie zachowań różnych autoskalerów.
+    \item \textbf{Jupyter Notebooks (z bibliotekami Python, np. Pandas, Matplotlib, Seaborn):} Środowisko to zostanie wykorzystane do zaawansowanej analizy statystycznej i generowania niestandardowych wykresów. Umożliwi ono szczegółowe przetwarzanie danych, przeprowadzanie testów statystycznych oraz tworzenie wysokiej jakości wizualizacji (np. wykresów słupkowych, liniowych, pudełkowych, rozrzutu), które zostaną włączone do pracy dyplomowej.
+    \item \textbf{Arkusz kalkulacyjny (np. Microsoft Excel, Google Sheets):} Do wstępnej analizy danych, ich agregacji oraz prostych obliczeń statystycznych. Może być również wykorzystany do organizacji surowych danych.
+    \item \textbf{Narzędzia do analizy logów (np. Loki, ELK Stack):} Służą do przeszukiwania, agregacji i analizy logów systemowych, co jest kluczowe dla jakościowej oceny zachowania autoskalerów i wykrywania problemów.
+\end{itemize}
+Wykorzystanie tych narzędzi zapewni zarówno możliwość dogłębnej analizy statystycznej, jak i czytelną prezentację uzyskanych rezultatów, co jest kluczowe dla skutecznej komunikacji wniosków badawczych.
+
+
+% \newpage
+% \section{Metodologia Badawcza}
+
+% \subsection{Sformułowanie problemu badawczego i pytań badawczych (szczegółowo)}
+
+% \subsection{Projektowanie eksperymentów}
+
+% \subsubsection{Wybór metryk oceny (np. wykorzystanie zasobów, opóźnienia, przepustowość)}
+
+% \subsubsection{Scenariusze obciążenia i symulacje}
+
+% \subsubsection{Narzędzia i środowisko eksperymentalne (np. klaster Kubernetes, narzędzia do monitorowania, generatory obciążenia)}
+
+% \subsection{Metody analizy danych}
+
+% \subsubsection{Analiza ilościowa i jakościowa}
+
+% \subsubsection{Narzędzia do wizualizacji i interpretacji wyników}

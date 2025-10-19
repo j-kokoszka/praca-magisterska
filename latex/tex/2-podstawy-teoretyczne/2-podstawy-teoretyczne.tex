@@ -1,0 +1,157 @@
+\newpage
+
+\section{Podstawy Teoretyczne i Przegląd Literatury}
+
+Niniejszy rozdział ma na celu przedstawienie kluczowych koncepcji teoretycznych oraz przegląd istniejącej literatury naukowej, niezbędnych do pełnego zrozumienia problematyki autonomicznego sterowania cyklem życia usług w środowisku Kubernetes. Rozpoczyna się od omówienia podstaw architektury Kubernetesa, jego komponentów oraz mechanizmów rozszerzeń, które stanowią platformę dla implementowanych rozwiązań. Następnie, w kontekście rosnącej złożoności systemów rozproszonych, przedstawione zostaną fundamentalne zasady automatyzacji zarządzania zasobami, ze szczególnym uwzględnieniem koncepcji pętli sterowania oraz systemów samoadaptujących się. Kluczową częścią rozdziału jest szczegółowy przegląd i analiza istniejących mechanizmów skalowania w Kubernetesie, takich jak Vertical Pod Autoscaler (VPA), Horizontal Pod Autoscaler (HPA) oraz Kubernetes Event-driven Autoscaling (KEDA), z uwzględnieniem ich zasad działania, ograniczeń i typowych zastosowań. Rozdział zostanie uzupełniony o wprowadzenie do modelu MAPE-K (Monitor, Analyze, Plan, Execute, Knowledge), który stanowi uznany paradygmat dla projektowania autonomicznych systemów zarządzania i będzie podstawą do opracowania własnego rozwiązania w dalszych częściach pracy. Zebrana w tym rozdziale wiedza teoretyczna stworzy solidne ramy dla przeprowadzenia badań empirycznych i analizy wyników.
+
+\subsection{Architektura i Koncepcje Kubernetesa}
+
+Kubernetes, będący otwartym systemem do automatyzacji wdrażania, skalowania i zarządzania aplikacjami kontenerowymi, stanowi obecnie dominującą platformę orkiestracyjną w ekosystemach chmurowych. Jego architektura opiera się na modelu \textbf{master-node}, gdzie \textbf{klaster Kubernetes} składa się z płaszczyzny sterowania (control plane), zazwyczaj uruchamianej na węzłach master, oraz z wielu węzłów roboczych (worker nodes), na których działają kontenery z aplikacjami.
+
+
+\subsubsection{Podstawowe komponenty: Master, Nodes, Pods, Deployments, Services}
+
+\textbf{Płaszczyzna sterowania} obejmuje kluczowe komponenty takie jak \textbf{kube-apiserver}, który wystawia API Kubernetesa i jest centralnym punktem komunikacji; \textbf{kube-scheduler}, odpowiedzialny za przydzielanie nowo tworzonych podów do węzłów; \textbf{kube-controller-manager}, zarządzający różnymi kontrolerami (np. kontroler replikacji, kontroler punktów końcowych); oraz \textbf{etcd}, będący rozproszoną bazą danych klucz-wartość, przechowującą stan klastra. Każdy \textbf{węzeł roboczy} zawiera \textbf{kubelet}, agenta komunikującego się z płaszczyzną sterowania, zarządzającego podami i kontenerami na danym węźle; oraz \textbf{kube-proxy}, który odpowiada za sieciowe reguły dla usług w klastrze, umożliwiając komunikację z podami.
+
+\subsubsection{Mechanizmy rozszerzeń: Custom Resource Definitions (CRDs), Operators}
+
+Koncepcyjnie, Kubernetes operuje na abstrakcjach takich jak \textbf{Pody} (najmniejsze jednostki wdrożenia, grupujące jeden lub więcej kontenerów), \textbf{Deployments} (zapewniające deklaratywne zarządzanie stanem aplikacji, automatyzujące aktualizacje i wycofywanie zmian), oraz \textbf{Services} (abstrakcje sieciowe, które definiują logiczny zestaw podów i politykę dostępu do nich). Elastyczność Kubernetesa jest dodatkowo wzmacniana przez mechanizmy rozszerzeń, takie jak \textbf{Custom Resource Definitions (CRDs)}, które umożliwiają definiowanie własnych obiektów API, oraz \textbf{Operatory}, będące oprogramowaniem automatyzującym zarządzanie złożonymi aplikacjami i ich komponentami w sposób, który odzwierciedla wiedzę domenową operatora ludzkiego. Zrozumienie tych fundamentalnych elementów jest kluczowe dla analizy mechanizmów autonomicznego sterowania, które wykorzystują i rozszerzają natywne możliwości platformy.
+
+
+
+
+
+\subsection{Automatyzacja Zarządzania Zasobami w Chmurze}
+
+Automatyzacja zarządzania zasobami w chmurze obliczeniowej jest fundamentalnym elementem wydajnych, niezawodnych i skalowalnych systemów informatycznych. Opiera się na wdrażaniu zasad automatyki i inżynierii sterowania, umożliwiając inteligentne, często autonomiczne zarządzanie infrastrukturą IT. W tym kontekście kluczowym pojęciem pozostaje pętla sterowania (control loop), będąca podstawą systemów samonaprawiających się oraz adaptacyjnych rozwiązań chmurowych.
+
+\subsubsection{Pojęcie pętli sterowania (Control Loops) w systemach rozproszonych}
+
+\textbf{Pętla sterowania} to podstawowy mechanizm automatyki, polegający na nieustannym monitorowaniu parametrów systemu, ich analizie oraz podejmowaniu działań korygujących, jeśli wykryta zostanie odchyłka od zadanych wartości. Pętle te mogą być zarówno otwarte, jak i zamknięte („feedback loops”), jednak w praktyce zarządzania chmurą dominują warianty z informacją zwrotną .
+
+Historycznie, idea pętli sterowania wywodzi się z XVIII wieku, gdy James Watt opracował regulator odśrodkowy dla maszyn parowych, umożliwiając automatyczne utrzymywanie zadanej prędkości obrotowej silnika poprzez mechaniczne sprzężenie zwrotne.
+
+
+W architekturach rozproszonych, jak chmura obliczeniowa czy systemy DCS (Distributed Control Systems), pętle sterowania realizowane są na wielu poziomach – od lokalnych kontrolerów odpowiedzialnych za pojedyncze węzły, po nadzorczy poziom systemowy. Przykłady obejmują:
+
+\begin{itemize}
+    \item \textit{Load Balancing Feedback Loops}: dynamiczne równoważenie obciążenia na podstawie bieżących informacji o stanie zasobów;
+    \item \textit{Scaling Feedback Loops}: automatyczna zmiana liczby aktywnych instancji usług zależnie od aktualnych potrzeb;
+    \item \textit{Health Monitoring Feedback Loops}: wykrywanie oraz samoczynna reakcja na awarie lub degradację wydajności.
+\end{itemize}
+
+Pętle te zapewniają adaptacyjność oraz samonaprawialność systemów, pozwalając na minimalizowanie wpływu awarii, optymalizację zużycia zasobów oraz ciągłość działania usług.
+
+\subsubsection{Autonomiczne systemy i samoadaptacja}
+Ewolucja automatyki i inżynierii sterowania doprowadziła do powstania \textbf{autonomicznych systemów}, które nie tylko wykonują zaprogramowane wcześniej zadania, lecz potrafią adaptować swoje zachowanie do zmieniających się warunków środowiska i własnego stanu. Zasadniczym mechanizmem jest tu samoadaptacja (self-adaptation), polegająca na dynamicznej zmianie parametrów lub sposobu działania systemu na podstawie analizy bieżących danych.
+
+W systemach autonomicznych typowe są zaawansowane architektury warstwowe, gdzie warstwa zarządzająca (managing subsystem) monitoruje „kondycję” systemu oraz środowiska i na tej podstawie podejmuje decyzje dotyczące rekonfiguracji czy optymalizacji:
+
+\begin{itemize}
+    \item Przykładem mogą być pojazdy autonomiczne (np. podwodne roboty inspekcyjne), których sterownik może dynamicznie przełączać tryby działania – np. powrót do stacji ładowania przy niskim poziomie energii, czy wybór mniej energochłonnego algorytmu wykrywania przeszkód w przypadku rosnących trudności środowiskowych ;
+    \item W chmurze obliczeniowej takie mechanizmy wykorzystywane są do dynamicznej alokacji zasobów, rekonfiguracji po awariach, czy inteligentnego dostrajania parametrów usług w odpowiedzi na nieprzewidywalne zmiany obciążenia .
+\end{itemize}
+
+Badania naukowe wskazują, że skuteczność samoadaptacji i autonomiczności w systemach rozproszonych w dużej mierze zależy od efektywności sprzężenia zwrotnego, precyzyjnego modelowania stanu systemu oraz algorytmów decyzyjnych uwzględniających zarówno aspekty wydajnościowe, jak i bezpieczeństwo czy energooszczędność.
+
+Rozwój autonomicznych i samoadaptacyjnych systemów w chmurze znajduje potwierdzenie w licznych badaniach, zarówno w obszarze zastosowań przemysłowych, jak i rozwoju koncepcji architektonicznych oraz formalnych metod modelowania, analiz i walidacji poprawności działania tych systemów. To właśnie te interdyscyplinarne innowacje – czerpiące z tradycyjnej automatyki, inżynierii oprogramowania, robotyki czy informatyki stosowanej – umożliwiają konsekwentną automatyzację i dalszy rozwój chmury obliczeniowej.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Przegląd Istniejących Mechanizmów Skalowania i Zarządzania}
+W kontekście dynamicznego środowiska Kubernetesa, efektywne zarządzanie zasobami i skalowanie aplikacji jest kluczowe dla zapewnienia wydajności, stabilności oraz optymalizacji kosztów. Kubernetes oferuje natywne mechanizmy automatycznego skalowania, które pozwalają na dostosowanie liczby instancji aplikacji (skalowanie horyzontalne) oraz zasobów przydzielonych pojedynczym instancjom (skalowanie wertykalne) w odpowiedzi na zmieniające się zapotrzebowanie. Ponadto, ekosystem Kubernetesa jest stale rozwijany o rozwiązania zewnętrzne, które rozszerzają te możliwości, umożliwiając skalowanie oparte na zdarzeniach pochodzących z różnych źródeł. Poniższe podsekcje przedstawiają szczegółową analizę kluczowych mechanizmów używanych do autonomicznego skalowania w Kubernetesie.
+
+\subsubsection{Vertical Pod Autoscaler (VPA): zasada działania, ograniczenia, zastosowania}
+\textbf{Vertical Pod Autoscaler (VPA)} jest mechanizmem Kubernetesa, który automatycznie dostosowuje żądania (requests) i limity (limits) zasobów CPU i pamięci dla pojedynczych Podów. Jego podstawowa zasada działania opiera się na ciągłym monitorowaniu rzeczywistego zużycia zasobów przez kontenery w Podzie. Na podstawie historycznych danych o wykorzystaniu, VPA rekomenduje lub automatycznie aplikuje optymalne wartości dla żądań i limitów zasobów, dążąc do minimalizacji marnotrawstwa zasobów przy jednoczesnym zapewnieniu stabilnej pracy aplikacji. VPA składa się z trzech głównych komponentów: \textbf{Recommender}, który analizuje metryki zużycia zasobów i proponuje optymalne wartości; \textbf{Updater}, który faktycznie modyfikuje specyfikację Podów lub, w trybie automatycznym, reinicjuje Pody z nowymi ustawieniami zasobów; oraz \textbf{Admission Controller}, który przechwytuje żądania tworzenia Podów i nadpisuje ich zasoby zgodnie z rekomendacjami VPA.
+
+Mimo swoich zalet, VPA posiada pewne ograniczenia. Jednym z głównych jest fakt, że automatyczne zastosowanie zmian zasobów zazwyczaj wymaga zrestartowania Poda, co może prowadzić do krótkotrwałych przerw w dostępności usługi. Ponadto, VPA najlepiej sprawdza się w przypadku aplikacji o stosunkowo przewidywalnym wzorcu zużycia zasobów, natomiast w aplikacjach o bardzo dynamicznych i nieregularnych skokach obciążenia może nie reagować wystarczająco szybko. Co więcej, VPA domyślnie rekomenduje wartości dla wszystkich kontenerów w Podzie, co może być nieoptymalne dla Podów z wieloma kontenerami o zróżnicowanych profilach zużycia. Zastosowania VPA obejmują głównie aplikacje, dla których kluczowa jest optymalizacja kosztów i wykorzystania pojedynczych instancji, takie jak bazy danych, systemy cache czy aplikacje monolityczne o stabilnym profilu obciążenia, gdzie precyzyjne dopasowanie zasobów jest ważniejsze niż natychmiastowa reakcja na nagłe piki.
+
+\subsubsection{Horizontal Pod Autoscaler (HPA): zasada działania, metryki, skalowanie oparte na obciążeniu}
+\textbf{Horizontal Pod Autoscaler (HPA)} to mechanizm Kubernetesa odpowiedzialny za automatyczne skalowanie liczby replik Podów w zależności od obserwowanego obciążenia. Jego główna zasada działania polega na monitorowaniu wybranych metryk (najczęściej zużycia CPU i pamięci, ale także metryk niestandardowych lub zewnętrznych) i porównywaniu ich z zdefiniowanymi progami. Jeśli wartość metryki przekroczy określony próg, HPA zwiększa liczbę replik Podów; jeśli spadnie poniżej progu, zmniejsza ich liczbę, dążąc do utrzymania średniego zużycia zasobów na poziomie zbliżonym do wartości docelowej. HPA działa jako kontroler w płaszczyźnie sterowania Kubernetesa, regularnie sprawdzając metryki z Metrics API (lub innych źródeł) i aktualizując pole `replicas` w obiektach takich jak Deployment, ReplicaSet czy StatefulSet.
+
+Kluczową zaletą HPA jest możliwość skalowania opartego na obciążeniu, co pozwala na efektywne zarządzanie dostępnością i wydajnością aplikacji w zmiennym środowisku. Metryki używane przez HPA mogą pochodzić z różnych źródeł:
+\begin{itemize}
+    \item \textbf{Metryki zasobów (Resource Metrics):} najczęściej używane są metryki dotyczące zużycia CPU (wyrażone jako procent żądanej wartości CPU) oraz pamięci. Są one dostarczane przez Metrics Server, który zbiera dane z kubeletów.
+    \item \textbf{Metryki niestandardowe (Custom Metrics):} umożliwiają skalowanie w oparciu o metryki specyficzne dla aplikacji (np. liczba żądań na sekundę, długość kolejki wiadomości), dostarczane przez adaptery Custom Metrics API.
+    \item \textbf{Metryki zewnętrzne (External Metrics):} pozwalają na skalowanie w oparciu o metryki pochodzące spoza klastra Kubernetes (np. długość kolejki w systemie messagingowym takim jak Kafka czy RabbitMQ), dostarczane przez adaptery External Metrics API.
+\end{itemize}
+HPA jest szczególnie efektywny dla aplikacji typu stateless, które mogą łatwo być skalowane horyzontalnie poprzez dodawanie lub usuwanie replik. Jego ograniczenia wynikają z opóźnień w reakcji na gwałtowne zmiany obciążenia (ze względu na konieczność uruchomienia nowych Podów) oraz z potrzeby precyzyjnego ustawienia progów metryk, co może być wyzwaniem w przypadku nieprzewidywalnych wzorców ruchu. Mimo to, HPA jest podstawowym narzędziem do utrzymania wysokiej dostępności i reagowania na piki obciążenia w większości wdrożeń Kubernetesa.
+
+\subsubsection{Kubernetes Event-driven Autoscaling (KEDA): integracja z brokerami zdarzeń, scenariusze użycia}
+\textbf{Kubernetes Event-driven Autoscaling (KEDA)} to elastyczne i rozszerzalne rozwiązanie typu open-source, które uzupełnia i rozszerza funkcjonalności Horizontal Pod Autoscaler (HPA), umożliwiając skalowanie aplikacji w Kubernetesie w oparciu o liczbę zdarzeń w kolejkach, strumieniach czy innych systemach zewnętrznych. KEDA działa jako operator Kubernetesa, który dynamicznie tworzy obiekty HPA na podstawie zdefiniowanych \textbf{Scalerów}, a następnie usuwa je, gdy nie są już potrzebne. To pozwala na zero-skalowanie, czyli redukcję liczby replik do zera, gdy nie ma żadnych zdarzeń do przetworzenia, co znacząco optymalizuje koszty.
+
+Kluczową cechą KEDA jest jego głęboka integracja z brokerami zdarzeń i zewnętrznymi systemami. KEDA oferuje szeroką gamę wbudowanych Scalerów dla popularnych technologii, takich jak Apache Kafka, RabbitMQ, Azure Service Bus, AWS SQS, Redis, Prometheus czy baza danych PostgreSQL. Dzięki temu aplikacje, które przetwarzają zdarzenia asynchronicznie, mogą być skalowane w sposób precyzyjny i efektywny, reagując bezpośrednio na bieżące zapotrzebowanie.
+
+Typowe scenariusze użycia KEDA obejmują:
+\begin{itemize}
+    \item \textbf{Aplikacje oparte na kolejkach wiadomości:} skalowanie workerów konsumujących wiadomości z kolejek, gdzie liczba replik jest wprost proporcjonalna do liczby oczekujących wiadomości.
+    \item \textbf{Funkcje serverless (Function-as-a-Service):} umożliwienie uruchamiania funkcji tylko wtedy, gdy pojawią się zdarzenia, minimalizując zużycie zasobów w czasie bezczynności.
+    \item \textbf{Przetwarzanie strumieni danych:} adaptacyjne skalowanie aplikacji przetwarzających strumienie danych w czasie rzeczywistym, reagując na zmieniającą się przepustowość strumienia.
+    \item \textbf{Integracja z bazami danych i systemami pamięci podręcznej:} skalowanie w oparciu o liczbę zapytań lub obciążenie tych systemów.
+\end{itemize}
+KEDA jest szczególnie cenne w architekturach event-driven, gdzie HPA oparte na CPU lub pamięci byłoby niewystarczające. Jego elastyczność i możliwość łatwego dodawania nowych Scalerów sprawiają, że jest to potężne narzędzie do budowania wysoce adaptacyjnych i ekonomicznych systemów w Kubernetesie.
+
+
+
+
+\subsection{Model MAPE-K w Systemach Samozarządzających}
+W obliczu rosnącej złożoności i dynamiki współczesnych systemów informatycznych, zwłaszcza tych rozproszonych i opartych na chmurze, tradycyjne podejścia do zarządzania stają się niewystarczające. Konieczność minimalizacji interwencji ludzkiej, zwiększenia odporności na awarie oraz optymalizacji wydajności i kosztów doprowadziła do rozwoju koncepcji systemów samozarządzających. Kluczowym paradygmatem w tym obszarze jest model MAPE-K, stanowiący ramy dla projektowania i implementacji autonomicznych mechanizmów kontrolnych. Model ten dostarcza ustrukturyzowane podejście do budowania systemów zdolnych do samokonfiguracji, samooptymalizacji, samonaprawy i samoochrony, w dużej mierze eliminując potrzebę ciągłego nadzoru człowieka.
+
+\subsubsection{Monitor, Analyze, Plan, Execute, Knowledge}
+Model MAPE-K składa się z czterech głównych komponentów funkcjonalnych tworzących pętlę sprzężenia zwrotnego, wspieraną przez wspólną bazę wiedzy. Każdy z tych elementów odgrywa kluczową rolę w procesie autonomicznego zarządzania:
+
+\begin{itemize}
+    \item \textbf{Monitor (Monitoruj):} Ten komponent jest odpowiedzialny za zbieranie danych o systemie i jego środowisku. Obejmuje to gromadzenie metryk wydajności (np. zużycie CPU, pamięci, opóźnienia, przepustowość), informacji o stanie komponentów, logów błędów oraz wszelkich innych danych kontekstowych, które są istotne dla podejmowania decyzji. Skuteczne monitorowanie wymaga odpowiedniej instrumentacji systemu i zdolności do agregacji danych z wielu źródeł w czasie rzeczywistym.
+    \item \textbf{Analyze (Analizuj):} Moduł analizy przetwarza zebrane dane, identyfikując wzorce, trendy oraz anomalie. Jego zadaniem jest diagnozowanie problemów, przewidywanie przyszłych stanów systemu oraz ocenianie, czy obecny stan odpowiada pożądanym celom. Analiza może obejmować zastosowanie statystyk, algorytmów uczenia maszynowego do wykrywania korelacji, predykcji obciążenia czy identyfikacji pierwotnych przyczyn problemów. W tym etapie system rozumie "co się dzieje i dlaczego".
+    \item \textbf{Plan (Planuj):} Na podstawie wyników analizy, komponent planowania generuje sekwencję akcji, które mają na celu dostosowanie systemu do pożądanego stanu lub rozwiązanie zdiagnozowanego problemu. Planowanie obejmuje wybór strategii adaptacji, optymalizację zasobów, definiowanie zmian konfiguracji lub modyfikację polityk. Ten etap odpowiada na pytanie "co należy zrobić".
+    \item \textbf{Execute (Wykonaj):} Moduł wykonawczy jest odpowiedzialny za implementację planu. Przekształca on abstrakcyjne akcje zdefiniowane w fazie planowania na konkretne operacje w systemie, takie jak skalowanie instancji, zmiana konfiguracji, restartowanie komponentów czy relokacja obciążenia. Wykonanie musi być odporne na błędy i zapewniać spójność systemu.
+    \item \textbf{Knowledge (Wiedza):} Komponent wiedzy stanowi centralne repozytorium informacji, które jest współdzielone przez wszystkie pozostałe moduły. Zawiera on cele systemu (np. polityki QoS, SLA), modele środowiska i aplikacji, historyczne dane o zachowaniu systemu, a także zasady i algorytmy wykorzystywane w analizie i planowaniu. Baza wiedzy jest dynamiczna i może być aktualizowana na podstawie doświadczeń zebranych podczas działania pętli.
+\end{itemize}
+
+\subsubsection{Aplikacja modelu MAPE-K w zarządzaniu usługami}
+Model MAPE-K jest powszechnie stosowany jako architektura referencyjna dla systemów samozarządzających w różnorodnych domenach, w tym w zarządzaniu usługami w chmurze obliczeniowej. Jego modularność i jasno zdefiniowane funkcje sprawiają, że idealnie nadaje się do projektowania autonomicznych kontrolerów, które mogą dynamicznie adaptować usługi do zmieniających się warunków.
+
+W kontekście zarządzania usługami, aplikacja modelu MAPE-K może przybrać następujące formy:
+\begin{itemize}
+    \item \textbf{Monitorowanie Usług:} obejmuje zbieranie metryk dotyczących dostępności, wydajności (np. czasy odpowiedzi, przepustowość), zużycia zasobów (CPU, pamięć, sieć, dysk) przez poszczególne usługi i ich komponenty. Monitorowane są również metryki biznesowe i zdarzenia pochodzące z zewnętrznych systemów.
+    \item \textbf{Analiza Zachowania Usług:} polega na analizie zebranych danych w celu wykrycia anomalii, przewidywania przyszłego obciążenia, identyfikacji wąskich gardeł lub określenia, czy usługi spełniają zdefiniowane poziomy SLA (Service Level Agreement). Analiza może obejmować agregację danych, tworzenie prognoz czy uruchamianie algorytmów detekcji wzorców.
+    \item \textbf{Planowanie Adaptacji Usług:} na podstawie wyników analizy, komponent planowania podejmuje decyzje o koniecznych zmianach. Może to być decyzja o skalowaniu horyzontalnym (dodanie/usunięcie instancji), skalowaniu wertykalnym (zmiana zasobów Podu), relokacji usług, optymalizacji konfiguracji czy wdrożeniu poprawek. Plan jest optymalizowany pod kątem wielu kryteriów, takich jak koszt, wydajność i odporność.
+    \item \textbf{Wykonanie Akcji Adaptacyjnych:} moduł wykonawczy realizuje zaplanowane zmiany poprzez interakcję z platformą orkiestracji (np. API Kubernetesa). Obejmuje to uruchamianie/zatrzymywanie Podów, modyfikowanie konfiguracji, aktualizowanie reguł sieciowych czy dostosowywanie parametrów bazy danych. Ważne jest, aby wykonanie było atomowe i bezpieczne, aby nie wprowadzać niestabilności.
+    \item \textbf{Baza Wiedzy dla Usług:} Przechowuje informacje o politykach zarządzania usługami, topologii sieci, zależnościach między mikroserwisami, historycznych profilach obciążenia, predefiniowanych strategiach skalowania, a także modelach predykcyjnych. Wiedza ta jest wykorzystywana na każdym etapie pętli, ewoluując wraz z doświadczeniem systemu.
+\end{itemize}
+Model MAPE-K zapewnia elastyczne ramy do budowania autonomicznych systemów zarządzania usługami, które są w stanie efektywnie reagować na dynamiczne warunki operacyjne, optymalizować wykorzystanie zasobów i zapewniać wysoką jakość usług bez ciągłej interwencji człowieka. Jego zastosowanie jest szczególnie wartościowe w złożonych i szybko zmieniających się środowiskach chmurowych, gdzie manualne zarządzanie jest nierealne.
+
+
+
+
+
+% \subsection{Automatyzacja Zarządzania Zasobami w Chmurze}
+% 
+% \subsubsection{Pojęcie pętli sterowania (Control Loops) w systemach rozproszonych}
+% 
+% \subsubsection{Autonomiczne systemy i samoadaptacja}
+
+% \subsection{Przegląd Istniejących Mechanizmów Skalowania i Zarządzania}
+
+% \subsubsection{Vertical Pod Autoscaler (VPA): zasada działania, ograniczenia, zastosowania}
+
+% \subsubsection{Horizontal Pod Autoscaler (HPA): zasada działania, metryki, skalowanie oparte na obciążeniu}
+
+% \subsubsection{Kubernetes Event-driven Autoscaling (KEDA): integracja z brokerami zdarzeń, scenariusze użycia}
+
+% \subsection{Model MAPE-K w Systemach Samozarządzających}
+
+% \subsubsection{Monitor, Analyze, Plan, Execute, Knowledge}
+
+% \subsubsection{Aplikacja modelu MAPE-K w zarządzaniu usługami}
