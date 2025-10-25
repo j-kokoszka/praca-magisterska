@@ -25,6 +25,7 @@ def cpu_intensive(loops: int = 1000000):
     data = b"test-data"
     for _ in range(loops):
         hashlib.sha256(data).digest()
+    duration = time.time() - start
     logger.info(f"/cpu called with loops={loops}, duration={duration:.3f}s")
     return {"status": "ok", "loops": loops}
 
