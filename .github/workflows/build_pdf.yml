@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'latex/**'
   # Pozwala na manualne uruchomienie workflow z poziomu GitHub UI
   workflow_dispatch:
 
