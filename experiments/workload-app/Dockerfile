@@ -21,5 +21,5 @@ COPY app.py /app/
 EXPOSE 8080
 
 # Run the FastAPI app
-CMD ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--log-level", "debug", "--access-log", "--port", "8080"]
 
