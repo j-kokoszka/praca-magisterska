@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
+import logging
 import hashlib
 import numpy as np
 import os
@@ -10,15 +11,21 @@ app = FastAPI()
 
 Instrumentator().instrument(app).expose(app)
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)  # or INFO
+logger = logging.getLogger(__name__)
+
 @app.get("/cpu")
 def cpu_intensive(loops: int = 1000000):
     """
     Symuluje CPU-bound workload.
     Wykonuje N pętli z operacjami hashującymi.
     """
+    start = time.time()
     data = b"test-data"
     for _ in range(loops):
         hashlib.sha256(data).digest()
+    logger.info(f"/cpu called with loops={loops}, duration={duration:.3f}s")
     return {"status": "ok", "loops": loops}
 
 
