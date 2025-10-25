@@ -12,7 +12,11 @@ app = FastAPI()
 Instrumentator().instrument(app).expose(app)
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)  # or INFO
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(funcName)s | %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",  # ISO-like
+)
 logger = logging.getLogger(__name__)
 
 @app.get("/cpu")
@@ -21,6 +25,7 @@ def cpu_intensive(loops: int = 1000000):
     Symuluje CPU-bound workload.
     Wykonuje N pętli z operacjami hashującymi.
     """
+    logger.info("Received /cpu request")
     start = time.time()
     data = b"test-data"
     for _ in range(loops):
@@ -28,7 +33,6 @@ def cpu_intensive(loops: int = 1000000):
     duration = time.time() - start
     logger.info(f"/cpu called with loops={loops}, duration={duration:.3f}s")
     return {"status": "ok", "loops": loops}
-
 
 @app.get("/mem")
 def mem_intensive(mb: int = 100):
@@ -41,7 +45,6 @@ def mem_intensive(mb: int = 100):
     # zatrzymujemy w pamięci na chwilę
     time.sleep(2)
     return {"status": "ok", "allocated_mb": mb, "array_sum": float(arr.sum())}
-
 
 @app.get("/io")
 def io_intensive(size: int = 10):

@@ -1,5 +1,7 @@
 # Use official Python slim image
-FROM python:3.11-slim
+FROM python:3.13-alpine
+
+RUN apk update && apk add --no-cache build-base gfortran blas-dev lapack-dev
 
 # Install Poetry
 RUN pip install --no-cache-dir poetry
@@ -17,9 +19,12 @@ RUN poetry config virtualenvs.create false \
 # Copy application code
 COPY app.py /app/
 
+# Copy logging configuration for uvicorn
+COPY logging.yaml /app/
+
 # Expose port
 EXPOSE 8080
 
 # Run the FastAPI app
-CMD ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--log-level", "debug", "--access-log", "--port", "8080"]
+CMD ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--log-config", "logging.yaml", "--port", "8080"]
 
