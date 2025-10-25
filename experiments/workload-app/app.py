@@ -40,10 +40,14 @@ def mem_intensive(mb: int = 100):
     Symuluje memory-bound workload.
     Alokuje tablicę o zadanym rozmiarze w MB.
     """
+    logger.info("Received /mem request")
+    start = time.time()
     size = mb * 1024 * 1024 // 8  # liczba elementów float64
     arr = np.ones(size, dtype=np.float64)
     # zatrzymujemy w pamięci na chwilę
     time.sleep(2)
+    duration = time.time() - start
+    logger.info(f"/mem called with size={size}, duration={duration:.3f}s")
     return {"status": "ok", "allocated_mb": mb, "array_sum": float(arr.sum())}
 
 @app.get("/io")
@@ -52,9 +56,13 @@ def io_intensive(size: int = 10):
     Symuluje I/O-bound workload.
     Tworzy plik tymczasowy o zadanym rozmiarze w MB i zapisuje go na dysku.
     """
+    logger.info("Received /mem request")
+    start = time.time()
     tmp_dir = tempfile.gettempdir()
     file_path = os.path.join(tmp_dir, "io_test_file")
     with open(file_path, "wb") as f:
         f.write(os.urandom(size * 1024 * 1024))
+    duration = time.time() - start
+    logger.info(f"/io called with file={file_path}, duration={duration:.3f}s")
     return {"status": "ok", "written_mb": size, "file": file_path}
 
