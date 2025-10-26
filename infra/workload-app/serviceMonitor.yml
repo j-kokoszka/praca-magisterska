@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: workload-app
+  namespace: default
+spec:
+  endpoints:
+  - honorLabels: true
+    interval: 5s
+    path: /metrics
+    port: service
+    scheme: http
+    scrapeTimeout: 30s
+  jobLabel: workload-app
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: workload-app
+      app.kubernetes.io/name: workload-app
+      app: workload-app

@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01-issuer
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  name: workload-app
+  namespace: default
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: some-dns-name.pl
+    http:
+      paths:
+      - backend:
+          service:
+            name: workload-app-service
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - some-dns-name.pl
+    secretName: workload-app-tls
