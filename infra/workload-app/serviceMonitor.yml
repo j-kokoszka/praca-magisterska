@@ -3,20 +3,20 @@ kind: ServiceMonitor
 metadata:
   name: workload-app
   namespace: default
+  labels:
+    app: workload-app
+    app.kubernetes.io/instance: workload-app
+    app.kubernetes.io/name: workload-app
+    release: kube-prometheus-stack
 spec:
   endpoints:
-  - honorLabels: true
-    interval: 5s
+  - interval: 5s
     path: /metrics
-    port: service
-    scheme: http
-    scrapeTimeout: 30s
+    port: http-metrics
   jobLabel: workload-app
-  namespaceSelector:
-    matchNames:
-    - default
   selector:
     matchLabels:
+      app: workload-app
       app.kubernetes.io/instance: workload-app
       app.kubernetes.io/name: workload-app
-      app: workload-app
+      release: kube-prometheus-stack

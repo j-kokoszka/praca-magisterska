@@ -5,6 +5,7 @@ metadata:
     app: workload-app
     app.kubernetes.io/instance: workload-app
     app.kubernetes.io/name: workload-app
+    release: kube-prometheus-stack
   name: workload-app
   namespace: default
 spec:
@@ -14,12 +15,14 @@ spec:
       app: workload-app
       app.kubernetes.io/instance: workload-app
       app.kubernetes.io/name: workload-app
+      release: kube-prometheus-stack
   template:
     metadata:
       labels:
         app: workload-app
         app.kubernetes.io/instance: workload-app
         app.kubernetes.io/name: workload-app
+        release: kube-prometheus-stack
     spec:
       containers:
       - image: ghcr.io/j-kokoszka/workload-app:latest
