@@ -9,7 +9,7 @@ metadata:
   name: workload-app
   namespace: default
 spec:
-  replicas: 1
+#   replicas: 1
   selector:
     matchLabels:
       app: workload-app
@@ -30,5 +30,8 @@ spec:
         name: workload-app
         resources:
           limits:
-            cpu: 500m
-            memory: 500M
+            cpu: 200m
+            memory: 100M
+          requests:
+            cpu: 200m
+            memory: 100M

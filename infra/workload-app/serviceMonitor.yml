@@ -10,7 +10,7 @@ metadata:
     release: kube-prometheus-stack
 spec:
   endpoints:
-  - interval: 5s
+  - interval: 1s
     path: /metrics
     port: http-metrics
   jobLabel: workload-app

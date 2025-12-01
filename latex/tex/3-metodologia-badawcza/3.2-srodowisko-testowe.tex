@@ -1,0 +1,80 @@
+\subsection{Środowisko testowe}
+
+\subsubsection{Warstwa wirtualizacji i sprzętu}
+W celu przeprowadzenia badań oraz weryfikacji przyjętych założeń projektowych przygotowano 
+dedykowane środowisko testowe. Infrastruktura została zaprojektowana w oparciu o paradygmat 
+\gls{iac}, co zapewnia powtarzalność procesu wdrażania oraz spójność konfiguracji.
+Jako platformę bazową wykorzystano środowisko wirtualizacji Proxmox. Na jego potrzeby 
+powołano klaster składający się z trzech maszyn wirtualnych o identycznej specyfikacji 
+sprzętowej. Każdy z węzłów dysponuje następującymi zasobami:
+\begin{itemize}
+    \item Procesor (vCPU): 4 rdzenie, \item Pamięć operacyjna (RAM): 8 GB,
+    \item Przestrzeń dyskowa: 100 GB.
+\end{itemize}
+
+Proces powoływania maszyn wirtualnych oraz konfiguracja warstwy sprzętowej zostały 
+zautomatyzowane przy użyciu narzędzia Terraform.
+
+\subsubsection{System operacyjny i orkiestracja}
+Na wszystkich węzłach zainstalowano system operacyjny Ubuntu 24.04 LTS. Stanowi on bazę 
+dla klastra Kubernetes, który został wdrożony przy użyciu lekkiej dystrybucji k3s w wersji 
+\texttt{v1.33.2+k3s1}.
+
+Instalacja oraz wstępna konfiguracja klastra zostały zrealizowane za pomocą narzędzia do 
+zarządzania konfiguracją Ansible, z wykorzystaniem roli \texttt{k3s-ansible} dostępnej w 
+repozytorium \footnote{\url{https://github.com/k3s-io/k3s-ansible}}. W ramach warstwy 
+sieciowej klastra \gls{cni} zastosowano domyślne rozwiązanie dla k3s, czyli Flannel, co 
+zapewnia stabilną komunikację między podami wewnątrz klastra.
+
+Zarządzanie cyklem życia aplikacji oraz konfiguracją klastra odbywa się zgodnie z podejściem 
+GitOps. Kluczowym elementem tej architektury jest narzędzie FluxCD, które stale monitoruje 
+repozytorium kodu i automatycznie synchronizuje stan klastra z definicjami zawartymi w 
+systemie kontroli wersji.
+
+Proces dostarczania oprogramowania wspierany jest przez przygotowane potoki \gls{cicd},
+które odpowiadają za budowanie, testowanie oraz przygotowanie manifestów wdrożeniowych. 
+Takie podejście pozwoliło na pełną automatyzację procesu wdrażania kolejnych zasobów i 
+usług w środowisku badawczym.
+
+\begin{table}[h]
+    \centering
+    \caption{Specyfikacja techniczna środowiska eksperymentalnego}
+    \label{tab:srodowisko_testowe}
+    \vspace{0.3cm}
+    \begin{tabular}{@{}ll@{}}
+        %\toprule
+        \textbf{Kategoria} & \textbf{Komponent / Specyfikacja} \\
+        %\midrule
+        Platforma wirtualizacji & Proxmox \\
+        Automatyzacja infrastruktury & Terraform \\
+        Konfiguracja systemu & Ansible (\texttt{k3s-ansible}) \\
+        %\midrule
+        Liczba węzłów & 3 maszyny wirtualne \\
+        Zasoby węzła & 4 vCPU, 8 GB RAM, 100 GB HDD \\
+        System operacyjny & Ubuntu 24.04 LTS \\
+        %\midrule
+        Orkiestrator & k3s (\texttt{v1.33.2+k3s1}) \\
+        Sieć (CNI) & Flannel \\
+        Model wdrażania & GitOps (FluxCD) \\
+        %\midrule
+        Narzędzie obciążające & k6 (uruchamiane zewnętrznie) \\
+        Metodyka testów & Generowanie ruchu HTTP z konsoli lokalnej \\
+        %\bottomrule
+    \end{tabular}
+\end{table}
+
+\subsubsection{Instrumentarium badawcze i narzędzia pomiarowe}
+W celu realizacji testów wydajnościowych oraz weryfikacji stabilności klastra pod obciążeniem,
+zastosowano dedykowane narzędzia do generowania ruchu sieciowego.
+
+Jako generator obciążenia wykorzystano narzędzie \textbf{k6}, które służy do przeprowadzania 
+testów wydajnościowych. Skrypty testowe k6, przygotowane w języku JavaScript, są uruchamiane 
+lokalnie z konsoli na stanowisku roboczym, a generowane przez nie żądania HTTP kierowane są 
+na zewnątrz klastra Kubernetes, co realistycznie symuluje ruch pochodzący od zewnętrznych 
+użytkowników. Taka metodyka pozwala na mierzenie kluczowych metryk z perspektywy klienta, w 
+tym opóźnień (\textit{latency}), przepustowości (\textit{throughput}) oraz wskaźnika błędów.
+
+Dane obciążeniowe kierowane są na docelową aplikację testową, która została zaprojektowana 
+specjalnie na potrzeby pracy magisterskiej. Architektura i specyfikacja tej aplikacji zostały 
+szczegółowo opisane w kolejnej sekcji dotyczącej eksperymentów.
+

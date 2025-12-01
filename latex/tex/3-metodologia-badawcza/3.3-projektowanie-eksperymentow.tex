@@ -1,0 +1,132 @@
+\subsection{Projektowanie eksperymentów}
+Projektowanie eksperymentów stanowi kluczowy etap niniejszej pracy magisterskiej, mający 
+na celu systematyczną i powtarzalną weryfikację postawionych hipotez oraz udzielenie 
+odpowiedzi na zdefiniowane problemy badawcze. Celem jest obiektywna ocena wydajności, 
+efektywności oraz zachowania autonomicznych mechanizmów skalowania w środowisku Kubernetes. 
+Eksperymenty zostaną zaprojektowane tak, aby umożliwić bezpośrednie porównanie działania 
+istniejących rozwiązań (VPA, HPA, KEDA) z autorskim podejściem opartym na modelu MAPE-K, 
+w kontrolowanych warunkach obciążenia.
+
+
+\subsubsection{Wybór metryk oceny}
+Aby rzetelnie ocenić skuteczność poszczególnych mechanizmów autoskalowania, konieczny jest 
+precyzyjny wybór obiektywnych i mierzalnych metryk. W ramach niniejszych badań zostaną 
+uwzględnione następujące kategorie metryk, które pozwolą na wieloaspektową analizę:
+
+\begin{enumerate}
+    \item \textbf{Metryki efektywności wykorzystania zasobów:}
+    \begin{itemize}
+        \item \textbf{Średnie i maksymalne zużycie CPU (\%):} Procentowe wykorzystanie 
+        procesora przez Pody w stosunku do przydzielonych im zasobów. Wysokie zużycie 
+        przy niskim marginesie błędu świadczy o efektywnym wykorzystaniu.
+        \item \textbf{Średnie i maksymalne zużycie pamięci (MiB/\%):} Analogicznie, pomiar 
+        wykorzystania pamięci.
+        \item \textbf{Współczynnik marnotrawstwa zasobów (\%):} Obliczony jako stosunek 
+        niewykorzystanych, ale przydzielonych zasobów do całkowitej ilości przydzielonych 
+        zasobów. Niższy współczynnik wskazuje na lepszą optymalizację.
+        \item \textbf{Liczba alokowanych vs. faktycznie wykorzystanych zasobów:} Analiza 
+        różnic między zasobami żądanymi (requests) i limitowanymi (limits) a rzeczywistym 
+        zużyciem.
+    \end{itemize}
+    \item \textbf{Metryki wydajności usług (Quality of Service - QoS):}
+    \begin{itemize}
+        \item \textbf{Średni i maksymalny czas odpowiedzi (Response Time - RT):} Mierzone 
+        w milisekundach, od momentu wysłania żądania do otrzymania odpowiedzi. Niższy czas 
+        odpowiedzi wskazuje na lepszą responsywność.
+        \item \textbf{Przepustowość (Throughput):} Liczba zrealizowanych operacji 
+        (np. żądań HTTP) na jednostkę czasu. Wyższa przepustowość oznacza większą zdolność 
+        systemu do obsługi obciążenia.
+        \item \textbf{Wskaźnik błędów (\%):} Procent nieudanych żądań lub operacji w stosunku 
+        do całkowitej liczby. Niższy wskaźnik świadczy o stabilności.
+        \item \textbf{P95/P99 czasu odpowiedzi:} 95. i 99. percentyl czasu odpowiedzi, 
+        wskazujący na doświadczenia większości użytkowników i skalę problemów dla marginalnej 
+        grupy.
+    \end{itemize}
+    \item \textbf{Metryki operacyjne i stabilności:}
+    \begin{itemize}
+        \item \textbf{Liczba skalowań (up/down):} Częstotliwość zmian liczby replik lub 
+        zasobów, co może świadczyć o stabilności lub "chwiejności" autoskalera.
+        \item \textbf{Liczba restartów Podów:} Dotyczy VPA, gdzie zmiana zasobów może wymagać 
+        restartu, co wpływa na dostępność.
+        \item \textbf{Czas stabilizacji po zmianie obciążenia:} Czas potrzebny systemowi na 
+        osiągnięcie stabilnego stanu (np. powrót metryk do pożądanych wartości) po gwałtownej 
+        zmianie obciążenia.
+    \end{itemize}
+\end{enumerate}
+Zebrane dane zostaną poddane analizie statystycznej w celu wyciągnięcia wiarygodnych wniosków.
+
+\subsubsection{Scenariusze obciążenia i symulacje}
+Aby zapewnić kompleksową ocenę i porównanie mechanizmów skalowania, eksperymenty zostaną 
+przeprowadzone z wykorzystaniem różnorodnych, realistycznych \textbf{scenariuszy obciążenia}. 
+Scenariusze te mają za zadanie odzwierciedlać typowe wzorce ruchu występujące w rzeczywistych 
+środowiskach produkcyjnych, a także testować odporność systemów na nagłe i ekstremalne zmiany. 
+Planuje się zastosowanie następujących typów obciążenia:
+
+\begin{itemize}
+    \item \textbf{Obciążenie stałe (Constant Load):} Utrzymywanie stabilnego, umiarkowanego 
+    obciążenia przez dłuższy czas, w celu oceny efektywności bazowej alokacji zasobów i 
+    stabilności działania autoskalerów.
+    \item \textbf{Obciążenie narastające (Ramp-up Load):} Stopniowe zwiększanie obciążenia, 
+    aby zbadać zdolność autoskalerów do adaptacji i skalowania w górę w miarę wzrostu 
+    zapotrzebowania.
+    \item \textbf{Obciążenie szczytowe (Peak Load):} Gwałtowny i wysoki wzrost obciążenia 
+    (tzw. "spike"), mający na celu przetestowanie szybkości reakcji i odporności mechanizmów 
+    na nagłe, intensywne zapotrzebowanie.
+    \item \textbf{Obciążenie zmienne cyklicznie (Cyclic/Diurnal Load):} Symulacja wzorców 
+    ruchu charakterystycznych dla cykli dobowych lub tygodniowych (np. niższe obciążenie w 
+    nocy, wyższe w ciągu dnia), w celu oceny zdolności autoskalerów do efektywnego skalowania 
+    zarówno w górę, jak i w dół.
+    \item \textbf{Obciążenie ze zmiennymi wzorcami dostępu (Varying Access Patterns):} 
+    Złożone scenariusze, które mogą symulować różne typy operacji (np. odczyty vs. zapisy 
+    w bazie danych), aby ocenić, jak mechanizmy radzą sobie z różnorodnym zapotrzebowaniem 
+    na zasoby.
+\end{itemize}
+Każdy scenariusz zostanie powtórzony wielokrotnie w celu zapewnienia wiarygodności 
+statystycznej wyników.
+
+\subsubsection{Narzędzia i środowisko eksperymentalne}
+Przeprowadzenie rzetelnych eksperymentów wymaga odpowiednio skonfigurowanego środowiska testowego 
+oraz zestawu narzędzi. W niniejszej pracy zostanie wykorzystany następujący zestaw zasobów:
+
+\begin{itemize}
+    \item \textbf{Klaster Kubernetes:} Do wdrożenia testowanych aplikacji i mechanizmów 
+    skalowania zostanie zbudowany dedykowany klaster Kubernetes. Rozważane są opcje wdrożenia 
+    na maszynach wirtualnych w chmurze publicznej (np. Google Kubernetes Engine - GKE, 
+    Amazon Elastic Kubernetes Service - EKS) lub w lokalnym środowisku wirtualnym 
+    (np. za pomocą narzędzi takich jak Kind, Kubeadm), z uwzględnieniem skalowalności i 
+    dostępności zasobów. Klaster zostanie skonfigurowany z wymaganymi komponentami, takimi 
+    jak Metrics Server, oraz odpowiednimi wersjami VPA, HPA i KEDA.
+    \item \textbf{Aplikacja testowa:} Zostanie zaimplementowana dedykowana aplikacja testowa, o kontrolowanym profilu zużycia zasobów i charakterystyce odpowiedzi, która będzie symulować rzeczywiste obciążenie. Aplikacja ta będzie wystawiona jako usługa w Kubernetesie, aby mogła być skalowana przez testowane mechanizmy. Przykładowo, może to być prosta aplikacja webowa generująca obciążenie CPU/RAM na podstawie parametrów żądania, lub aplikacja oparta na kolejkach wiadomości.
+    \item \textbf{Generatory obciążenia (Load Generators):} Do generowania kontrolowanego ruchu i symulacji scenariuszy obciążenia zostaną użyte narzędzia takie jak Apache JMeter, K6, Locust lub wrk. Narzędzia te pozwolą na precyzyjne sterowanie liczbą współbieżnych użytkowników, liczbą żądań na sekundę oraz wzorcami dostępu, co umożliwi odwzorowanie zdefiniowanych scenariuszy.
+    \item \textbf{Narzędzia do monitorowania i zbierania metryk:} Klaster zostanie wyposażony w system monitorujący do zbierania danych o wydajności i zużyciu zasobów. Rozważane jest wykorzystanie stosu \textbf{Prometheus} (do zbierania metryk), \textbf{Grafana} (do wizualizacji danych) oraz \textbf{Loki} (do agregacji logów). Dodatkowo, do zbierania specyficznych danych o działaniu Podów i autoskalerów wykorzystane zostanie API Kubernetesa oraz narzędzia wiersza poleceń.
+    \item \textbf{Środowisko programistyczne dla rozwiązania MAPE-K:} Dla implementacji autorskiego rozwiązania MAPE-K zostanie wykorzystany język programowania (np. Go, Python) i biblioteki do interakcji z API Kubernetesa.
+\end{itemize}
+Szczegółowa konfiguracja każdego z narzędzi i komponentów środowiska testowego zostanie opisana w dalszej części pracy, zapewniając pełną transparentność metodologii.
+
+\subsubsection{Analiza Wrażliwości i Narzut Systemowy (Overhead)}
+
+Weryfikacja efektywności autonomicznej pętli sterującej wymaga nie tylko pomiaru zysków w zakresie wydajności (\textit{Service Level Objectives - SLO}) i optymalizacji kosztów, lecz także krytycznej analizy narzutu systemowego (\textit{overhead}) generowanego przez sam mechanizm monitorowania i sterowania. Agresywne nastawy pętli, w szczególności interwał odpytywania metryk (\textit{polling rate}) ustawiony na $1\,\text{s}$ (w przypadku \texttt{KEDA} i \texttt{Prometheus}), stanowią kluczowy czynnik ryzyka, wprowadzający potencjalną niestabilność i przeciążenie.
+
+Narzut systemowy, $\mathcal{O}_{\text{MAPE-K}}$, definiowany jest jako zużycie zasobów klastra, które jest bezpośrednim skutkiem działania pętli sterującej, a nie obciążenia aplikacyjnego. W ramach pracy wyodrębniono trzy główne wektory generowania narzutu przy wysokiej częstotliwości próbkowania:
+
+\begin{enumerate}
+    \item \textbf{Saturacja Warstwy Sterowania (\textit{Control Plane Saturation}):} Częste zapytania (\texttt{GET/LIST} zasobów \texttt{CustomResourceDefinitions} oraz statusów \texttt{HPA/Deployment}) do \texttt{kube-apiserver} i \texttt{etcd}. Jest to najbardziej krytyczny punkt obciążenia, prowadzący do dławienia (\textit{throttling}) pozostałych żądań administracyjnych.
+    \item \textbf{Koszty Infrastruktury Monitorującej:} Wzrost zużycia CPU i pamięci RAM przez komponenty takie jak \texttt{Prometheus} (ze względu na konieczność parsowania, indeksowania i zapisu dużej liczby próbek na sekundę) oraz operatorzy skalujący (\texttt{KEDA Operator}).
+    \item \textbf{Narzut Aplikacyjny i Sieciowy:} Konieczność częstego generowania i serializacji metryk wewnątrz aplikacji (endpoint \texttt{/metrics}), co w systemach jednowątkowych może prowadzić do wzrostu opóźnień (\textit{latency}) w obsłudze ruchu biznesowego.
+\end{enumerate}
+
+Do pomiaru narzutu systemowego wykorzystano zestaw metryk bazujących na systemach monitorujących klastra Kubernetes:
+\begin{itemize}
+    \item \textbf{Zużycie CPU/RAM \texttt{kube-apiserver}:} Monitorowane za pomocą metryk \texttt{kube\_pod\_container\_resource\_limits} oraz \texttt{usage\_seconds\_total}.
+    \item \textbf{Współczynnik Dławienia (\textit{Throttling Rate}):} Wzrost liczby błędów \texttt{429 (Too Many Requests)} w metryce \texttt{apiserver\_request\_total}.
+    \item \textbf{Opóźnienie etcd:} Analiza metryki \texttt{etcd\_disk\_wal\_fsync\_duration\_seconds} jako wskaźnika wydajności persystencji danych klastra.
+\end{itemize}
+
+
+W celu wyznaczenia opłacalności stosowania agresywnego próbkowania przeprowadzono test A/B, porównując dwie konfiguracje pętli sterującej przy identycznym obciążeniu syntetycznym:
+
+\begin{itemize}
+    \item \textbf{Scenariusz A (Baseline):} \texttt{Polling Rate} $= 30\,\text{s}$ (Standardowy).
+    \item \textbf{Scenariusz B (Real-time):} \texttt{Polling Rate} $= 1\,\text{s}$ (Agresywny).
+\end{itemize}
+Wyniki testu umożliwią określenie punktu, w którym narzut $\mathcal{O}_{\text{MAPE-K}}$ staje się istotny, a dalsze zwiększanie częstotliwości próbkowania przestaje przynosić korzyści w stabilizacji wydajności aplikacji.

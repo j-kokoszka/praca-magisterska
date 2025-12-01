@@ -1,0 +1,32 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: workload-app-scaledobject
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: workload-app            # nazwa Deploymentu / StatefulSetu
+  minReplicaCount: 1
+  maxReplicaCount: 10
+
+  cooldownPeriod: 10              # (opcjonalnie) czas wygaszania skalowania
+  pollingInterval: 2             # (opcjonalnie) jak często KEDA odpala query
+
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        metricName: http_requests_total
+        query: |
+          sum(rate(http_requests_total{service="workload-app-service"}[1m]))
+        threshold: "10"           # skalowanie powyżej 10 req/s
+    - type: kubernetes-metrics
+      metadata:
+        # Typ pomiaru: Celuj w średnie wykorzystanie CPU.
+        metricName: cpu
+        # Cel, jaki ma osiągnąć obciążenie CPU.
+        # Wartość "80" oznacza 80% rdzenia.
+        targetAverageValue: "80"
+        # Typ pomiaru: Wartość średnia (AverageValue) to standard dla CPU.
+        operator: average
+

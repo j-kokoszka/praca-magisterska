@@ -1,0 +1,38 @@
+\subsection{Sformułowanie problemu badawczego i pytań badawczych}
+
+Głównym problemem badawczym, do którego rozwiązania dąży niniejsza praca, jest określenie optymalnych 
+strategii autonomicznego zarządzania cyklem życia usług w środowisku Kubernetes, ze szczególnym uwzględnieniem 
+mechanizmów skalowania i alokacji zasobów. W kontekście rosnącej złożoności aplikacji rozproszonych i potrzeby 
+minimalizacji interwencji ludzkiej, kluczowe staje się zrozumienie, w jaki sposób istniejące rozwiązania radzą 
+sobie z dynamicznie zmieniającymi się warunkami obciążenia oraz czy autorskie podejście, oparte na modelu 
+MAPE-K, może zaoferować wyższą efektywność i adaptacyjność. Problem ten dotyka bezpośrednio wyzwań związanych 
+z utrzymaniem wysokiej dostępności, optymalnego wykorzystania zasobów oraz obniżeniem kosztów operacyjnych w 
+nowoczesnych architekturach chmurowych.
+
+W celu rozwiązania postawionego problemu badawczego, sformułowano następujące szczegółowe pytania badawcze:
+\begin{enumerate}
+
+    \item \textbf{Charakterystyka i Ograniczenia Istniejących Mechanizmów}: W jaki sposób \gls{vpa}, \gls{hpa}
+    oraz \gls{keda} reagują na różnorodne, dynamiczne wzorce obciążenia (np. narastające obciążenie, 
+    obciążenie szczytowe, obciążenie zmienne cyklicznie) w kontekście efektywności alokacji zasobów 
+    (CPU, pamięć) i stabilności usług (opóźnienia, błędy)? Jakie są ich fundamentalne ograniczenia w zakresie 
+    proaktywnego skalowania i optymalizacji, które wynikają z ich wewnętrznych zasad działania?
+
+    \item \textbf{Wydajność i Adaptacyjność Rozwiązania MAPE-K}: Czy autorskie rozwiązanie autonomicznej pętli 
+    sterującej, zaprojektowane i zaimplementowane w oparciu o model \gls{mapek}, jest w stanie osiągnąć wyższą 
+    efektywność wykorzystania zasobów oraz lepszą responsywność (np. niższe średnie i maksymalne opóźnienia) 
+    aplikacji w środowisku Kubernetes w porównaniu do \gls{vpa}, \gls{hpa} i \gls{keda}, szczególnie w 
+    scenariuszach wymagających zaawansowanej predykcji i koordynacji decyzji?
+
+    \item \textbf{Wpływ Bazy Wiedzy na Efektywność MAPE-K}: W jakim stopniu komponent bazy wiedzy w 
+    architekturze \gls{mapek}, integrujący historyczne dane o wydajności i predefiniowane polityki adaptacji, 
+    przyczynia się do poprawy jakości decyzji podejmowanych przez pętlę sterującą oraz do długoterminowej 
+    optymalizacji działania systemu w porównaniu do podejść czysto reaktywnych?
+
+    \item \textbf{Kryteria Oceny i Metryki Sukcesu}: Jakie kluczowe metryki wydajnościowe (np. średnie zużycie
+    CPU/RAM, procent niewykorzystanych zasobów, czasy odpowiedzi, przepustowość, liczba błędów) oraz wskaźniki
+    operacyjne (np. liczba restartów Podów, stabilność skalowania) należy zastosować, aby obiektywnie porównać 
+    skuteczność działania \gls{vpa}, {hpa}, \gls{keda} oraz autorskiego rozwiązania \gls{mapek} w 
+    kontrolowanych warunkach eksperymentalnych?
+
+\end{enumerate}
