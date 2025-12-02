@@ -146,28 +146,73 @@ mechanizmów skalowania (VPA, HPA, KEDA).
 
 \subsubsection{Analiza Wrażliwości i Narzut Systemowy (Overhead)}
 
-Weryfikacja efektywności autonomicznej pętli sterującej wymaga nie tylko pomiaru zysków w zakresie wydajności (\textit{Service Level Objectives - SLO}) i optymalizacji kosztów, lecz także krytycznej analizy narzutu systemowego (\textit{overhead}) generowanego przez sam mechanizm monitorowania i sterowania. Agresywne nastawy pętli, w szczególności interwał odpytywania metryk (\textit{polling rate}) ustawiony na $1\,\text{s}$ (w przypadku \texttt{KEDA} i \texttt{Prometheus}), stanowią kluczowy czynnik ryzyka, wprowadzający potencjalną niestabilność i przeciążenie.
+Weryfikacja efektywności autonomicznej pętli sterującej wymaga nie tylko pomiaru zysków w 
+zakresie wydajności (\textit{Service Level Objectives - SLO}) i optymalizacji kosztów, lecz 
+także krytycznej analizy narzutu systemowego (\textit{overhead}) generowanego przez sam 
+mechanizm monitorowania i sterowania. Agresywne nastawy pętli, w szczególności interwał 
+odpytywania metryk (\textit{polling rate}) ustawiony na $1\,\text{s}$ (w przypadku \texttt{KEDA} 
+i \texttt{Prometheus}), stanowią kluczowy czynnik ryzyka, wprowadzający potencjalną niestabilność 
+i przeciążenie.
 
-Narzut systemowy, $\mathcal{O}_{\text{MAPE-K}}$, definiowany jest jako zużycie zasobów klastra, które jest bezpośrednim skutkiem działania pętli sterującej, a nie obciążenia aplikacyjnego. W ramach pracy wyodrębniono trzy główne wektory generowania narzutu przy wysokiej częstotliwości próbkowania:
+\noindent
+\paragraph{Teoria Sterowania: Bezwładność Systemu i Kryterium Próbkowania}
+\hfill\\
+Fundamentalnym aspektem, który należy uwzględnić przy projektowaniu dyskretnej pętli sterującej, 
+jest \textbf{bezwładność} elementu wykonawczego. W kontekście skalowania w chmurze, 
+\textbf{czas reakcji systemu} ($T_{\text{reaction}}$) jest definiowany głównie przez czas startu 
+nowego poda (\textit{Image Pull} $+$ \textit{App Startup}). Jeżeli czas startu wynosi np. 
+$T_{\text{start}}=15\,\text{s}$, a próbkowanie sygnału odbywa się co $T_{\text{sampling}}=1\,\text{s}$, 
+pętla sterowania generuje $14$ "pustych" przebiegów, podejmując decyzje na 
+\textbf{nieaktualnych danych}.
+
+Zgodnie z ogólnymi zasadami teorii sterowania systemów dyskretnych, efektywna częstotliwość 
+próbkowania powinna być znacząco większa niż odwrotność czasu reakcji:
+$$F_{\text{sampling}} \gg \frac{1}{T_{\text{reaction}}}$$
+Niemniej jednak, zbyt agresywne próbkowanie (tj. gdy $T_{\text{sampling}} \ll T_{\text{reaction}}$) 
+jest \textbf{naukowe nieuzasadnione} i generuje jedynie \textbf{szum decyzyjny} oraz nadmierne 
+obciążenie. Mierzenie stanu systemu częściej niż czas jego fizycznej reakcji nie przekazuje nowej, 
+istotnej informacji do kontrolera. Może to prowadzić do zjawiska \textbf{overscalingu} – kontroler 
+może próbować skalować system jeszcze bardziej, zanim pierwsze nowe instancje w ogóle przejdą w 
+stan gotowości.
+
+Narzut systemowy, $\mathcal{O}_{\text{MAPE-K}}$, definiowany jest jako zużycie zasobów klastra, 
+które jest bezpośrednim skutkiem działania pętli sterującej, a nie obciążenia aplikacyjnego. W 
+ramach pracy wyodrębniono trzy główne wektory generowania narzutu przy wysokiej częstotliwości 
+próbkowania:
 
 \begin{enumerate}
-    \item \textbf{Saturacja Warstwy Sterowania (\textit{Control Plane Saturation}):} Częste zapytania (\texttt{GET/LIST} zasobów \texttt{CustomResourceDefinitions} oraz statusów \texttt{HPA/Deployment}) do \texttt{kube-apiserver} i \texttt{etcd}. Jest to najbardziej krytyczny punkt obciążenia, prowadzący do dławienia (\textit{throttling}) pozostałych żądań administracyjnych.
-    \item \textbf{Koszty Infrastruktury Monitorującej:} Wzrost zużycia CPU i pamięci RAM przez komponenty takie jak \texttt{Prometheus} (ze względu na konieczność parsowania, indeksowania i zapisu dużej liczby próbek na sekundę) oraz operatorzy skalujący (\texttt{KEDA Operator}).
-    \item \textbf{Narzut Aplikacyjny i Sieciowy:} Konieczność częstego generowania i serializacji metryk wewnątrz aplikacji (endpoint \texttt{/metrics}), co w systemach jednowątkowych może prowadzić do wzrostu opóźnień (\textit{latency}) w obsłudze ruchu biznesowego.
+    \item \textbf{Saturacja Warstwy Sterowania (\textit{Control Plane Saturation}):} Częste 
+    zapytania (\texttt{GET/LIST} zasobów \texttt{CustomResourceDefinitions} oraz statusów 
+    \texttt{HPA/Deployment}) do\\ \texttt{kube-apiserver} i \texttt{etcd}. Jest to najbardziej 
+    krytyczny punkt obciążenia, prowadzący do dławienia (\textit{throttling}) pozostałych żądań 
+    administracyjnych.
+    \item \textbf{Koszty Infrastruktury Monitorującej:} Wzrost zużycia CPU i pamięci RAM przez 
+    komponenty takie jak \texttt{Prometheus} (ze względu na konieczność parsowania, indeksowania 
+    i zapisu dużej liczby próbek na sekundę) oraz operatorzy skalujący (\texttt{KEDA Operator}).
+    \item \textbf{Narzut Aplikacyjny i Sieciowy:} Konieczność częstego generowania i serializacji 
+    metryk wewnątrz aplikacji (endpoint \texttt{/metrics}), co w systemach jednowątkowych może 
+    prowadzić do wzrostu opóźnień (\textit{latency}) w obsłudze ruchu biznesowego.
 \end{enumerate}
 
-Do pomiaru narzutu systemowego wykorzystano zestaw metryk bazujących na systemach monitorujących klastra Kubernetes:
+Do pomiaru narzutu systemowego wykorzystano zestaw metryk bazujących na systemach monitorujących 
+klastra Kubernetes:
 \begin{itemize}
-    \item \textbf{Zużycie CPU/RAM \texttt{kube-apiserver}:} Monitorowane za pomocą metryk \texttt{kube\_pod\_container\_resource\_limits} oraz \texttt{usage\_seconds\_total}.
-    \item \textbf{Współczynnik Dławienia (\textit{Throttling Rate}):} Wzrost liczby błędów \texttt{429 (Too Many Requests)} w metryce \texttt{apiserver\_request\_total}.
-    \item \textbf{Opóźnienie etcd:} Analiza metryki \texttt{etcd\_disk\_wal\_fsync\_duration\_seconds} jako wskaźnika wydajności persystencji danych klastra.
+    \item \textbf{Zużycie CPU/RAM \texttt{kube-apiserver}:} Monitorowane za pomocą metryk\\
+    \texttt{kube\_pod\_container\_resource\_limits} oraz \texttt{usage\_seconds\_total}.
+    \item \textbf{Współczynnik Dławienia (\textit{Throttling Rate}):} Wzrost liczby błędów 
+    \texttt{429 (Too Many Requests)} w metryce \texttt{apiserver\_request\_total}.
+    \item \textbf{Opóźnienie etcd:} Analiza metryki \texttt{etcd\_disk\_wal\_fsync\_duration\_seconds} 
+    jako wskaźnika wydajności persystencji danych klastra.
 \end{itemize}
 
 
-W celu wyznaczenia opłacalności stosowania agresywnego próbkowania przeprowadzono test A/B, porównując dwie konfiguracje pętli sterującej przy identycznym obciążeniu syntetycznym:
+W celu wyznaczenia opłacalności stosowania agresywnego próbkowania przeprowadzono test A/B, 
+porównując dwie konfiguracje pętli sterującej przy identycznym obciążeniu syntetycznym:
 
 \begin{itemize}
     \item \textbf{Scenariusz A (Baseline):} \texttt{Polling Rate} $= 30\,\text{s}$ (Standardowy).
     \item \textbf{Scenariusz B (Real-time):} \texttt{Polling Rate} $= 1\,\text{s}$ (Agresywny).
 \end{itemize}
-Wyniki testu umożliwią określenie punktu, w którym narzut $\mathcal{O}_{\text{MAPE-K}}$ staje się istotny, a dalsze zwiększanie częstotliwości próbkowania przestaje przynosić korzyści w stabilizacji wydajności aplikacji.
+Wyniki testu umożliwią określenie punktu, w którym narzut $\mathcal{O}_{\text{MAPE-K}}$ staje się 
+istotny, a dalsze zwiększanie częstotliwości próbkowania przestaje przynosić korzyści w stabilizacji 
+wydajności aplikacji.

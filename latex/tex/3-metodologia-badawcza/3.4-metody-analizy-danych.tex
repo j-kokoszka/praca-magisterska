@@ -1,37 +1,83 @@
 \subsection{Metody analizy danych}
 
-Po zakończeniu fazy gromadzenia danych z przeprowadzonych eksperymentów, kluczowe jest zastosowanie odpowiednich metod analizy, które umożliwią wyciągnięcie wiarygodnych wniosków i weryfikację postawionych hipotez badawczych. Proces analizy danych będzie obejmował zarówno podejścia ilościowe, jak i jakościowe, a także wykorzystanie specjalistycznych narzędzi do wizualizacji i interpretacji wyników. Celem jest nie tylko stwierdzenie różnic w wydajności poszczególnych mechanizmów skalowania, ale również zrozumienie przyczyn obserwowanych zachowań.
+Po zakończeniu fazy gromadzenia danych z przeprowadzonych eksperymentów, kluczowe 
+jest zastosowanie odpowiednich metod analizy, które umożliwią wyciągnięcie wiarygodnych 
+wniosków i weryfikację postawionych hipotez badawczych. Proces analizy danych będzie 
+obejmował zarówno podejścia ilościowe, jak i jakościowe, a także wykorzystanie 
+specjalistycznych narzędzi do wizualizacji i interpretacji wyników. Celem jest nie 
+tylko stwierdzenie różnic w wydajności poszczególnych mechanizmów skalowania, ale 
+również zrozumienie przyczyn obserwowanych zachowań.
 
 \subsubsection{Analiza ilościowa i jakościowa}
-Analiza danych zostanie przeprowadzona dwutorowo, łącząc metody ilościowe i jakościowe w celu uzyskania kompleksowego obrazu funkcjonowania badanych mechanizmów:
+Analiza danych zostanie przeprowadzona dwutorowo, łącząc metody ilościowe i jakościowe 
+w celu uzyskania kompleksowego obrazu funkcjonowania badanych mechanizmów:
 
 
 \begin{enumerate}
-    \item \textbf{Analiza Ilościowa:} Będzie stanowiła podstawę weryfikacji hipotez i opierać się na statystycznym przetwarzaniu zebranych metryk numerycznych. Kluczowe aspekty analizy ilościowej obejmują:
+    \item \textbf{Analiza Ilościowa:} Będzie stanowiła podstawę weryfikacji hipotez i 
+    opierać się na statystycznym przetwarzaniu zebranych metryk numerycznych. Kluczowe 
+    aspekty analizy ilościowej obejmują:
     \begin{itemize}
-        \item \textbf{Statystyka opisowa:} Obliczenie średnich, median, odchyleń standardowych, minimum i maksimum dla wszystkich zebranych metryk (np. czasu odpowiedzi, zużycia CPU, przepustowości). Pozwoli to na wstępne scharakteryzowanie danych i identyfikację rozkładów.
-        \item \textbf{Analiza trendów:} Badanie zmian metryk w czasie dla różnych scenariuszy obciążenia, co pozwoli na ocenę dynamiki reakcji każdego autoskalera.
-        \item \textbf{Analiza korelacji:} Zbadanie związków między różnymi metrykami (np. między obciążeniem a czasem odpowiedzi, lub między liczbą Podów a zużyciem zasobów).
-        \item \textbf{Testy porównawcze:} Zastosowanie odpowiednich testów statystycznych (np. testów t-Studenta, analizy wariancji ANOVA) do porównania średnich wartości metryk między poszczególnymi mechanizmami skalowania (VPA, HPA, KEDA, MAPE-K) w celu określenia istotności statystycznej obserwowanych różnic.
-        \item \textbf{Analiza percentylowa:} Obliczenie percentyli (np. P95, P99) dla metryk wydajności, co jest kluczowe dla oceny doświadczeń użytkowników i identyfikacji ewentualnych anomalii lub "ogonów" rozkładu.
+        \item \textbf{Statystyka opisowa:} Obliczenie średnich, median, odchyleń 
+        standardowych, minimum i maksimum dla wszystkich zebranych metryk (np. czasu 
+        odpowiedzi, zużycia CPU, przepustowości). Pozwoli to na wstępne scharakteryzowanie 
+        danych i identyfikację rozkładów.
+        \item \textbf{Analiza trendów:} Badanie zmian metryk w czasie dla różnych 
+        scenariuszy obciążenia, co pozwoli na ocenę dynamiki reakcji każdego autoskalera.
+        \item \textbf{Analiza korelacji:} Zbadanie związków między różnymi metrykami 
+        (np. między obciążeniem a czasem odpowiedzi, lub między liczbą Podów a zużyciem 
+        zasobów).
+        \item \textbf{Testy porównawcze:} Zastosowanie odpowiednich testów statystycznych 
+        (np. testów t-Studenta, analizy wariancji ANOVA) do porównania średnich wartości 
+        metryk między poszczególnymi mechanizmami skalowania (VPA, HPA, KEDA, MAPE-K) w 
+        celu określenia istotności statystycznej obserwowanych różnic.
+        \item \textbf{Analiza percentylowa:} Obliczenie percentyli (np. P95, P99) dla 
+        metryk wydajności, co jest kluczowe dla oceny doświadczeń użytkowników i identyfikacji 
+        ewentualnych anomalii lub "ogonów" rozkładu.
     \end{itemize}
-    \item \textbf{Analiza Jakościowa:} Uzupełni analizę ilościową, dostarczając głębszego zrozumienia przyczyn obserwowanych zachowań, zwłaszcza w przypadku anomalii lub niespodziewanych wyników. Obejmie ona:
+    \item \textbf{Analiza Jakościowa:} Uzupełni analizę ilościową, dostarczając głębszego 
+    zrozumienia przyczyn obserwowanych zachowań, zwłaszcza w przypadku anomalii lub 
+    niespodziewanych wyników. Obejmie ona:
     \begin{itemize}
-        \item \textbf{Analiza logów systemowych i zdarzeń Kubernetesa:} Przeglądanie logów z komponentów autoskalerów, kubeleta i kontrolera Kubernetes w celu zidentyfikowania konkretnych decyzji, błędów lub zdarzeń, które mogły wpłynąć na zachowanie systemu.
-        \item \textbf{Analiza konfiguracji i polityk:} Szczegółowa ocena, jak specyficzne konfiguracje i algorytmy każdego autoskalera wpływały na jego reakcje w danych scenariuszach.
-        \item \textbf{Studia przypadków (Case Studies):} Wybór konkretnych, interesujących momentów w przebiegu eksperymentów (np. nagłe skoki obciążenia, awarie, momenty stabilizacji) i ich dogłębna analiza jakościowa w celu wyjaśnienia obserwowanych zjawisk.
+        \item \textbf{Analiza logów systemowych i zdarzeń Kubernetesa:} Przeglądanie logów 
+        z komponentów autoskalerów, kubeleta i kontrolera Kubernetes w celu zidentyfikowania 
+        konkretnych decyzji, błędów lub zdarzeń, które mogły wpłynąć na zachowanie systemu.
+        \item \textbf{Analiza konfiguracji i polityk:} Szczegółowa ocena, jak specyficzne 
+        konfiguracje i algorytmy każdego autoskalera wpływały na jego reakcje w danych 
+        scenariuszach.
+        \item \textbf{Studia przypadków (Case Studies):} Wybór konkretnych, interesujących 
+        momentów w przebiegu eksperymentów (np. nagłe skoki obciążenia, awarie, momenty 
+        stabilizacji) i ich dogłębna analiza jakościowa w celu wyjaśnienia obserwowanych 
+        zjawisk.
     \end{itemize}
 \end{enumerate}
-Połączenie obu podejść pozwoli na kompleksową interpretację wyników, łącząc precyzję danych numerycznych z kontekstualnym zrozumieniem mechanizmów działania.
+Połączenie obu podejść pozwoli na kompleksową interpretację wyników, łącząc precyzję danych 
+numerycznych z kontekstualnym zrozumieniem mechanizmów działania.
 
 \subsubsection{Narzędzia do wizualizacji i interpretacji wyników}
-Efektywna wizualizacja danych jest niezbędna do szybkiego zrozumienia złożonych zbiorów danych i komunikowania wyników badań. Do wizualizacji i interpretacji wyników eksperymentów zostaną wykorzystane następujące narzędzia:
+Efektywna wizualizacja danych jest niezbędna do szybkiego zrozumienia złożonych zbiorów 
+danych i komunikowania wyników badań. Do wizualizacji i interpretacji wyników eksperymentów 
+zostaną wykorzystane następujące narzędzia:
 
 \begin{itemize}
-    \item \textbf{Grafana:} To narzędzie typu open-source do tworzenia interaktywnych dashboardów. Zostanie użyta do wizualizacji metryk czasowych (np. zużycie CPU/RAM w funkcji czasu, liczba replik, czasy odpowiedzi) zbieranych z Prometheus. Pozwoli to na dynamiczne śledzenie zmian i porównywanie zachowań różnych autoskalerów.
-    \item \textbf{Jupyter Notebooks (z bibliotekami Python, np. Pandas, Matplotlib, Seaborn):} Środowisko to zostanie wykorzystane do zaawansowanej analizy statystycznej i generowania niestandardowych wykresów. Umożliwi ono szczegółowe przetwarzanie danych, przeprowadzanie testów statystycznych oraz tworzenie wysokiej jakości wizualizacji (np. wykresów słupkowych, liniowych, pudełkowych, rozrzutu), które zostaną włączone do pracy dyplomowej.
-    \item \textbf{Arkusz kalkulacyjny (np. Microsoft Excel, Google Sheets):} Do wstępnej analizy danych, ich agregacji oraz prostych obliczeń statystycznych. Może być również wykorzystany do organizacji surowych danych.
-    \item \textbf{Narzędzia do analizy logów (np. Loki, ELK Stack):} Służą do przeszukiwania, agregacji i analizy logów systemowych, co jest kluczowe dla jakościowej oceny zachowania autoskalerów i wykrywania problemów.
+    \item \textbf{Grafana:} To narzędzie typu open-source do tworzenia interaktywnych 
+    dashboardów. Zostanie użyta do wizualizacji metryk czasowych (np. zużycie CPU/RAM w 
+    funkcji czasu, liczba replik, czasy odpowiedzi) zbieranych z Prometheus. Pozwoli to na 
+    dynamiczne śledzenie zmian i porównywanie zachowań różnych autoskalerów.
+    \item \textbf{Jupyter Notebooks (z bibliotekami Python, np. Pandas, Matplotlib, 
+    Seaborn):} Środowisko to zostanie wykorzystane do zaawansowanej analizy statystycznej 
+    i generowania niestandardowych wykresów. Umożliwi ono szczegółowe przetwarzanie danych, 
+    przeprowadzanie testów statystycznych oraz tworzenie wysokiej jakości wizualizacji (np. 
+    wykresów słupkowych, liniowych, pudełkowych, rozrzutu), które zostaną włączone do pracy 
+    dyplomowej.
+    \item \textbf{Arkusz kalkulacyjny (np. Microsoft Excel, Google Sheets):} Do wstępnej 
+    analizy danych, ich agregacji oraz prostych obliczeń statystycznych. Może być również 
+    wykorzystany do organizacji surowych danych.
+    \item \textbf{Narzędzia do analizy logów (np. Loki, ELK Stack):} Służą do przeszukiwania, 
+    agregacji i analizy logów systemowych, co jest kluczowe dla jakościowej oceny zachowania 
+    autoskalerów i wykrywania problemów.
 \end{itemize}
-Wykorzystanie tych narzędzi zapewni zarówno możliwość dogłębnej analizy statystycznej, jak i czytelną prezentację uzyskanych rezultatów, co jest kluczowe dla skutecznej komunikacji wniosków badawczych.
+Wykorzystanie tych narzędzi zapewni zarówno możliwość dogłębnej analizy statystycznej, jak i 
+czytelną prezentację uzyskanych rezultatów, co jest kluczowe dla skutecznej komunikacji 
+wniosków badawczych.
 
