@@ -1,0 +1,4 @@
+apiVersion: kopf.dev/v1
+kind: ScalingController
+metadata:
+  name: my-scl

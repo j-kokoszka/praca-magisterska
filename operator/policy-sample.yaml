@@ -1,0 +1,10 @@
+apiVersion: example.com/v1
+kind: AutoScalerPolicy
+metadata:
+  name: demo-policy
+spec:
+  targetDeployment: demo-app
+  mode: horizontal
+  minReplicas: 2
+  maxReplicas: 5
+
