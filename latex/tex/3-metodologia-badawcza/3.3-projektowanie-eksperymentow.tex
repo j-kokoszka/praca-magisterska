@@ -1,3 +1,5 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection{Projektowanie eksperymentów}
 Projektowanie eksperymentów stanowi kluczowy etap niniejszej pracy magisterskiej, mający 
 na celu systematyczną i powtarzalną weryfikację postawionych hipotez oraz udzielenie 
@@ -7,6 +9,7 @@ Eksperymenty zostaną zaprojektowane tak, aby umożliwić bezpośrednie porówna
 istniejących rozwiązań (VPA, HPA, KEDA) z autorskim podejściem opartym na modelu MAPE-K, 
 w kontrolowanych warunkach obciążenia.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsubsection{Wybór metryk oceny}
 Aby rzetelnie ocenić skuteczność poszczególnych mechanizmów autoskalowania, konieczny jest 
@@ -55,6 +58,8 @@ uwzględnione następujące kategorie metryk, które pozwolą na wieloaspektową
 \end{enumerate}
 Zebrane dane zostaną poddane analizie statystycznej w celu wyciągnięcia wiarygodnych wniosków.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsubsection{Scenariusze obciążenia i symulacje}
 Aby zapewnić kompleksową ocenę i porównanie mechanizmów skalowania, eksperymenty zostaną 
 przeprowadzone z wykorzystaniem różnorodnych, realistycznych \textbf{scenariuszy obciążenia}. 
@@ -84,24 +89,60 @@ Planuje się zastosowanie następujących typów obciążenia:
 Każdy scenariusz zostanie powtórzony wielokrotnie w celu zapewnienia wiarygodności 
 statystycznej wyników.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsubsection{Narzędzia i środowisko eksperymentalne}
 Przeprowadzenie rzetelnych eksperymentów wymaga odpowiednio skonfigurowanego środowiska testowego 
 oraz zestawu narzędzi. W niniejszej pracy zostanie wykorzystany następujący zestaw zasobów:
 
+\paragraph{Obciążana usługa testowa}
+\hfill\\
+Obciążana usługa testowa została zaimplementowana w języku Python z wykorzystaniem frameworka 
+\textbf{FastAPI}. Jej głównym zadaniem jest symulowanie zróżnicowanych scenariuszy zużycia 
+zasobów, niezbędnych do weryfikacji funkcjonalności mechanizmów automatycznego skalowania
+(w tym VPA, HPA, KEDA oraz Operatora MAPE-K). Aplikacja udostępnia trzy dedykowane punkty 
+końcowe (endpointy), z których każdy symuluje inny typ obciążenia:
+
 \begin{itemize}
-    \item \textbf{Klaster Kubernetes:} Do wdrożenia testowanych aplikacji i mechanizmów 
-    skalowania zostanie zbudowany dedykowany klaster Kubernetes. Rozważane są opcje wdrożenia 
-    na maszynach wirtualnych w chmurze publicznej (np. Google Kubernetes Engine - GKE, 
-    Amazon Elastic Kubernetes Service - EKS) lub w lokalnym środowisku wirtualnym 
-    (np. za pomocą narzędzi takich jak Kind, Kubeadm), z uwzględnieniem skalowalności i 
-    dostępności zasobów. Klaster zostanie skonfigurowany z wymaganymi komponentami, takimi 
-    jak Metrics Server, oraz odpowiednimi wersjami VPA, HPA i KEDA.
-    \item \textbf{Aplikacja testowa:} Zostanie zaimplementowana dedykowana aplikacja testowa, o kontrolowanym profilu zużycia zasobów i charakterystyce odpowiedzi, która będzie symulować rzeczywiste obciążenie. Aplikacja ta będzie wystawiona jako usługa w Kubernetesie, aby mogła być skalowana przez testowane mechanizmy. Przykładowo, może to być prosta aplikacja webowa generująca obciążenie CPU/RAM na podstawie parametrów żądania, lub aplikacja oparta na kolejkach wiadomości.
-    \item \textbf{Generatory obciążenia (Load Generators):} Do generowania kontrolowanego ruchu i symulacji scenariuszy obciążenia zostaną użyte narzędzia takie jak Apache JMeter, K6, Locust lub wrk. Narzędzia te pozwolą na precyzyjne sterowanie liczbą współbieżnych użytkowników, liczbą żądań na sekundę oraz wzorcami dostępu, co umożliwi odwzorowanie zdefiniowanych scenariuszy.
-    \item \textbf{Narzędzia do monitorowania i zbierania metryk:} Klaster zostanie wyposażony w system monitorujący do zbierania danych o wydajności i zużyciu zasobów. Rozważane jest wykorzystanie stosu \textbf{Prometheus} (do zbierania metryk), \textbf{Grafana} (do wizualizacji danych) oraz \textbf{Loki} (do agregacji logów). Dodatkowo, do zbierania specyficznych danych o działaniu Podów i autoskalerów wykorzystane zostanie API Kubernetesa oraz narzędzia wiersza poleceń.
-    \item \textbf{Środowisko programistyczne dla rozwiązania MAPE-K:} Dla implementacji autorskiego rozwiązania MAPE-K zostanie wykorzystany język programowania (np. Go, Python) i biblioteki do interakcji z API Kubernetesa.
+    \item \textbf{\texttt{/cpu}}: Symuluje obciążenie \textit{CPU-bound} (zależne od procesora) 
+    poprzez wykonywanie operacji haszujących (\texttt{hashlib.sha256}).
+    \item \textbf{\texttt{/mem}}: Symuluje obciążenie \textit{Memory-bound} (związane z 
+    pamięcią operacyjną) poprzez dynamiczną alokację dużych tablic (\texttt{numpy}).
+    \item \textbf{\texttt{/io}}: Symuluje obciążenie \textit{I/O-bound} (wejścia/wyjścia) 
+    poprzez operacje zapisu i odczytu plików tymczasowych.
 \end{itemize}
-Szczegółowa konfiguracja każdego z narzędzi i komponentów środowiska testowego zostanie opisana w dalszej części pracy, zapewniając pełną transparentność metodologii.
+
+Poprzez zmianę parametrów przekazywanych w żądaniach HTTP do tych endpointów, możliwe jest 
+precyzyjne kontrolowanie intensywności obciążenia klastra. Ponadto, aplikacja posiada 
+wbudowaną instrumentację (\texttt{prometheus-fastapi-instrumentator}), która automatycznie 
+wystawia metryki wydajnościowe. Metryki te są zbierane przez system monitorujący klastra, 
+stanowiąc kluczowe dane wejściowe dla wszystkich testowanych metod automatycznego skalowania.
+
+\paragraph{Generator ruchu k6}
+\hfill\\
+Jako generator ruchu sieciowego i narzędzie do przeprowadzania testów wydajnościowych 
+wykorzystano \textbf{k6}. Jest to narzędzie \textit{open source}, które pozwala na 
+definiowanie skomplikowanych scenariuszy testowych w języku JavaScript.
+
+Kluczową cechą metodologiczną jest fakt, że \textbf{skrypty testowe k6 są uruchamiane lokalnie 
+z konsoli} na stanowisku roboczym. Generowane przez nie żądania HTTP kierowane są na zewnętrzny 
+adres klastra Kubernetes (przez serwis typu \texttt{LoadBalancer}), co realistycznie symuluje 
+ruch pochodzący od zewnętrznych użytkowników. Taka konfiguracja umożliwia pomiar kluczowych 
+metryk (np. opóźnienia \textit{latency}) z perspektywy klienta, zapewniając wiarygodność 
+danych wyjściowych testów porównawczych.
+
+\paragraph{Środowisko eksperymentalne (klaster Kubernetes)}
+\hfill\\
+Szczegółowa specyfikacja klastra Kubernetes, w tym parametry maszyn wirtualnych, system 
+operacyjny oraz narzędzia do zarządzania infrastrukturą (\textbf{Terraform}, \textbf{Ansible}, 
+\textbf{FluxCD}), zostały opisane w podrozdziałach \texttt{3.2.1} i \texttt{3.2.2}. Na potrzeby 
+eksperymentów w tym środowisku wdrożono również kompletny stos monitorujący (\textbf{Prometheus}, 
+\textbf{Grafana}), który służy zarówno do zasilania pętli Operatora MAPE-K, jak i jako główne 
+narzędzie do analizy danych i wizualizacji wyników porównawczych wszystkich testowanych 
+mechanizmów skalowania (VPA, HPA, KEDA).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsubsection{Analiza Wrażliwości i Narzut Systemowy (Overhead)}
 
