@@ -18,18 +18,11 @@
 \usepackage[toc, acronym]{glossaries}
 \makeglossaries
 \loadglsentries{glossary}
+\usepackage{listings}
+\usepackage{xcolor}
 
+\input{config/listing}
 
-% Definiowanie terminów bezpośrednio w dokumencie zamiast \loadglsentries{glossary}
-% \newacronym{vpa}{VPA}{Vertical Pod Autoscaler}
-% \newacronym{hpa}{HPA}{Horizontal Pod Autoscaler}
-% \newacronym{keda}{KEDA}{Kubernetes Event-driven Autoscaling}
-% \newacronym{mapek}{MAPE-K}{Monitor, Analyze, Plan, Execute, Knowledge}
-% 
-% \newglossaryentry{kubernetes}{
-%     name=Kubernetes,
-%     description={Platforma orkiestracji kontenerów}
-% }
 
 \langpol % Dla języka angielskiego mamy \langeng
 \graphicspath{{img/}}             % Katalog z obrazkami.
@@ -90,15 +83,10 @@
 \input{tex/1-wstep/1-wstep}
 \input{tex/2-podstawy-teoretyczne/2-podstawy-teoretyczne}
 \input{tex/3-metodologia-badawcza/3-metodologia-badawcza}
-\input{tex/4-implementacja-kubernetes/4-implementacja-kubernetes}
+\input{tex/4-implementacja-skalowanie/4-implementacja-kubernetes}
 \input{tex/5-implementacja-mapek/5-implementacja-mapek}
 \input{tex/6-analiza/6-analiza}
 \input{tex/7-podsumowanie/7-podsumowanie}
-
-% \input{tex/1-wstep}         % Wygodnie jest trzymać każdy rozdział w osobnym pliku.
-% \input{tex/2-de-finibus}    % Umożliwia to również łatwą migrację do nowej wersji szablonu:
-% \input{tex/3-code-listings} % wystarczy podmienić swoje pliki main.tex i eiti-thesis.cls
-                            % na nowe wersje, a cały tekst pracy pozostaje nienaruszony.
 
 \newpage % Rozdziały zaczynamy od nowej strony
 % \section{Summatio}          % Można też pisać rozdziały w jednym pliku.
@@ -145,17 +133,15 @@
 \vspace{1cm}          % vertical space
 \listofappendicestoc  % Spis załączników
 
+\input{tex/appendix/appendix.tex}
+
 % Załączniki
-\newpage
-\appendix{Nazwa załącznika 1}
-\lipsum[1-8]
+% \newpage
+% \appendix{Nazwa załącznika 1}
+% \lipsum[1-8]
+% 
+% \newpage
+% \appendix{Nazwa załącznika 2}
+% \lipsum[1-4]
 
-\newpage
-\appendix{Nazwa załącznika 2}
-\lipsum[1-4]
-
-% Używając powyższych spisów jako szablonu,
-% możesz tu dodać swój własny wykaz bądź listę,
-% np. spis algorytmów.
-
-\end{document} % Dobranoc.
+\end{document} 

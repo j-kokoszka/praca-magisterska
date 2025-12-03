@@ -1,0 +1,62 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Konfiguracja i Wdrożenie Mechanizmów Skalowania}
+
+W niniejszym podrozdziale przedstawiono proces konfiguracji referencyjnych mechanizmów skalowania 
+(VPA, HPA, KEDA) w przygotowanym środowisku badawczym opartym na dystrybucji k3s. Zgodnie z 
+przyjętą w pracy metodyką \textit{Infrastructure as Code}, wszystkie polityki skalowania zostały 
+zdefiniowane w formie deklaratywnych manifestów YAML i wdrożone przy użyciu narzędzia FluxCD, co 
+zapewnia powtarzalność eksperymentów oraz spójność konfiguracji z repozytorium git.
+
+Celem tego etapu było nie tylko uruchomienie poszczególnych autoskalerów, ale przede wszystkim ich 
+kalibracja w taki sposób, aby stanowiły wiarygodny punkt odniesienia (ang. \textit{baseline}) dla 
+autorskiego rozwiązania opartego na modelu MAPE-K. W procesie konfiguracji szczególną uwagę 
+zwrócono na parametry określające czułość mechanizmów oraz częstotliwość próbkowania metryk, 
+dążąc do wyeliminowania zjawiska oscylacji (ang. \textit{flapping}) przy jednoczesnym zachowaniu 
+responsywności na zadane scenariusze obciążenia (CPU-bound oraz Memory-bound). Poniżej opisano 
+szczegóły implementacyjne dla każdego z badanych mechanizmów.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Konfiguracja i Wdrożenie VPA (Vertical Pod Autoscaler)}
+
+Vertical Pod Autoscaler (VPA) został wdrożony w środowisku eksperymentalnym w celu automatycznego 
+dostosowywania wartości \textit{requests} oraz \textit{limits} zasobów CPU i pamięci dla aplikacji 
+\texttt{workload-app}. Mechanizm ten, zgodnie z architekturą opisaną w rozdziale poświęconym 
+podstawom teoretycznym, składa się z trzech komponentów: \textit{Recommender}, \textit{Updater} 
+oraz \textit{Admission Controller}, które odpowiednio analizują historyczne metryki, stosują 
+rekomendacje i nadpisują konfigurację zasobów podczas tworzenia Podów.
+
+Wdrożenie VPA przeprowadzono zgodnie z metodyką \textit{Infrastructure as Code}, w pełni 
+zintegrowaną z podejściem GitOps wykorzystującym narzędzie FluxCD. Wszystkie manifesty zostały 
+zapisane w repozytorium i automatycznie synchronizowane ze stanem klastra. Taki sposób zarządzania 
+pozwolił na zapewnienie powtarzalności eksperymentów oraz ścisłej kontroli nad wersjonowaniem 
+konfiguracji.
+
+Konfiguracja VPA dla aplikacji \texttt{workload-app} obejmowała utworzenie dedykowanego obiektu 
+\texttt{VerticalPodAutoscaler}, który obserwuje zasoby zużywane przez kontener oraz generuje 
+rekomendacje dotyczące ich optymalnego przydziału. W ramach eksperymentów zastosowano tryb 
+działania \textit{``Auto''}, co oznacza, że komponent \textit{Updater} mógł w sposób automatyczny 
+restartować Pody, aby wprowadzić nowe wartości zasobów, gdy zostały one uznane za bardziej 
+adekwatne na podstawie dotychczasowych pomiarów.
+
+Fragment przykładowej konfiguracji VPA przedstawiono poniżej:
+
+VPA został uruchomiony równolegle z pozostałymi mechanizmami skalowania, jednak nie wpływał 
+bezpośrednio na liczbę replik aplikacji. Jego zadaniem było wyłącznie dostosowywanie zasobów 
+przypisanych pojedynczemu Podowi, co umożliwiało analizę wpływu zmian wertykalnych na wskaźniki 
+wydajności oraz stabilności systemu. Zastosowanie tego mechanizmu było szczególnie istotne w 
+scenariuszach \textit{memory-bound}, gdzie właściwe dobranie limitów miało kluczowe znaczenie dla 
+uniknięcia zjawiska \textit{Out-of-Memory Killing} oraz nadmiernej alokacji pamięci.
+
+Wdrożenie VPA w środowisku k3s, wspieranym przez Flannel jako warstwę sieciową, nie wymagało 
+dodatkowej konfiguracji w obrębie klastra. Komponenty autoskalera zostały zainstalowane jako 
+osobny zestaw CRD i kontrolerów, a ich działanie monitorowane było za pomocą Prometheus i Grafana, 
+zgodnie z narzędziami pomiarowymi opisanymi w rozdziale metodologicznym. Dzięki temu cały proces 
+obserwacji i oceny działania VPA mógł zostać przeprowadzony w sposób systematyczny oraz spójny 
+z pozostałymi eksperymentami.
+
+
+\subsubsection{Konfiguracja i Wdrożenie HPA (Horizontal Pod Autoscaler)}
+
+\subsubsection{Konfiguracja i Wdrożenie KEDA (Kubernetes Event-driven Autoscaling)}
