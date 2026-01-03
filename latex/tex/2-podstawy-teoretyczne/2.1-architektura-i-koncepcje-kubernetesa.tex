@@ -1,0 +1,39 @@
+
+\subsection{Architektura i koncepcje Kubernetesa}
+
+Kubernetes, będący otwartym systemem do automatyzacji wdrażania, skalowania oraz zarządzania aplikacjami
+kontenerowymi, stanowi obecnie dominującą platformę orkiestracyjną w ekosystemach chmurowych. Jego
+architektura opiera się na modelu \emph{master--node}, w którym \textbf{klaster Kubernetesa} składa się
+z \gls{controlplane}, zazwyczaj uruchamianej na węzłach typu \emph{master}, oraz z wielu \gls{workernode},
+na których działają kontenery z aplikacjami.
+
+\subsubsection{Podstawowe komponenty: control plane, nodes, pods, deployments, services}
+
+\gls{controlplane} obejmuje kluczowe komponenty systemowe, takie jak \textbf{kube-apiserver},
+który udostępnia interfejs API Kubernetesa i stanowi centralny punkt komunikacji w klastrze;
+\textbf{kube-scheduler}, odpowiedzialny za przydzielanie nowo tworzonych \gls{pod} do odpowiednich
+węzłów; \textbf{kube-controller-manager}, zarządzający zestawem kontrolerów realizujących logikę
+utrzymania pożądanego stanu systemu (m.in. kontroler replikacji czy kontroler punktów końcowych);
+oraz \textbf{etcd}, będący rozproszoną bazą danych typu klucz--wartość, przechowującą aktualny stan
+klastra.
+
+Każdy \gls{workernode} zawiera komponent \textbf{kubelet}, pełniący rolę agenta komunikującego się
+z płaszczyzną sterowania oraz zarządzającego cyklem życia podów i kontenerów na danym węźle,
+a także \textbf{kube-proxy}, który odpowiada za implementację reguł sieciowych dla \gls{service},
+umożliwiając komunikację pomiędzy podami oraz dostęp do usług zewnętrznych.
+
+\subsubsection{Mechanizmy rozszerzeń: CRDs i operatory}
+
+Kubernetes operuje na zestawie abstrakcji, takich jak \gls{pod}, stanowiące najmniejszą jednostkę
+wdrożeniową i grupujące jeden lub więcej kontenerów; \gls{deployment}, zapewniające deklaratywne
+zarządzanie stanem aplikacji, w tym automatyzację aktualizacji oraz wycofywania zmian; oraz
+\gls{service}, będące abstrakcjami sieciowymi definiującymi logiczny zbiór podów oraz politykę
+dostępu do nich.
+
+Elastyczność platformy jest dodatkowo rozszerzana poprzez mechanizmy takie jak \gls{crd}, które
+umożliwiają definiowanie własnych obiektów API i integrację niestandardowych zasobów z natywnym
+modelem sterowania Kubernetesa. Na ich bazie budowane są \gls{operator}, czyli komponenty
+oprogramowania enkapsulujące wiedzę domenową i automatyzujące zarządzanie złożonymi aplikacjami
+oraz ich cyklem życia w klastrze. Zrozumienie tych fundamentalnych elementów stanowi podstawę do
+analizy mechanizmów autonomicznego sterowania, które wykorzystują i rozszerzają natywne możliwości
+platformy Kubernetes.

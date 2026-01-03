@@ -1,0 +1,50 @@
+%%%
+\subsection{Automatyzacja zarządzania zasobami w chmurze}
+
+Automatyzacja zarządzania zasobami w chmurze obliczeniowej jest fundamentalnym elementem wydajnych, 
+niezawodnych i skalowalnych systemów informatycznych. Opiera się na wdrażaniu zasad automatyki i 
+inżynierii sterowania, umożliwiając inteligentne, często autonomiczne zarządzanie infrastrukturą IT. 
+W tym kontekście kluczowym pojęciem pozostaje pętla sterowania (control loop), będąca podstawą systemów 
+samonaprawiających się oraz adaptacyjnych rozwiązań chmurowych.
+
+\subsubsection{Pojęcie pętli sterowania (Control Loops) w systemach rozproszonych}
+
+\textbf{Pętla sterowania} to podstawowy mechanizm automatyki, polegający na nieustannym monitorowaniu 
+parametrów systemu, ich analizie oraz podejmowaniu działań korygujących, jeśli wykryta zostanie 
+odchyłka od zadanych wartości. Pętle te mogą być zarówno otwarte, jak i zamknięte („feedback loops”), 
+jednak w praktyce zarządzania chmurą dominują warianty z informacją zwrotną .
+
+Historycznie, idea pętli sterowania wywodzi się z XVIII wieku, gdy James Watt opracował regulator odśrodkowy
+ dla maszyn parowych, umożliwiając automatyczne utrzymywanie zadanej prędkości obrotowej silnika poprzez 
+ mechaniczne sprzężenie zwrotne.
+
+
+W architekturach rozproszonych, jak chmura obliczeniowa czy systemy DCS (Distributed Control Systems), 
+pętle sterowania realizowane są na wielu poziomach – od lokalnych kontrolerów odpowiedzialnych za pojedyncze węzły, po nadzorczy poziom systemowy. Przykłady obejmują:
+
+\begin{itemize}
+    \item \textit{Load Balancing Feedback Loops}: dynamiczne równoważenie obciążenia na podstawie bieżących informacji o stanie zasobów;
+    \item \textit{Scaling Feedback Loops}: automatyczna zmiana liczby aktywnych instancji usług zależnie od aktualnych potrzeb;
+    \item \textit{Health Monitoring Feedback Loops}: wykrywanie oraz samoczynna reakcja na awarie lub degradację wydajności.
+\end{itemize}
+
+Pętle te zapewniają adaptacyjność oraz samonaprawialność systemów, pozwalając na minimalizowanie wpływu awarii,
+ optymalizację zużycia zasobów oraz ciągłość działania usług.
+
+\subsubsection{Autonomiczne systemy i samoadaptacja}
+Ewolucja automatyki i inżynierii sterowania doprowadziła do powstania \textbf{autonomicznych systemów}, które
+nie tylko wykonują zaprogramowane wcześniej zadania, lecz potrafią adaptować swoje zachowanie do zmieniających się 
+warunków środowiska i własnego stanu. Zasadniczym mechanizmem jest tu samoadaptacja (self-adaptation), polegająca na dynamicznej zmianie parametrów lub sposobu działania systemu na podstawie analizy bieżących danych.
+
+W systemach autonomicznych typowe są zaawansowane architektury warstwowe, gdzie warstwa zarządzająca (managing subsystem) monitoruje „kondycję” systemu oraz środowiska i na tej podstawie podejmuje decyzje dotyczące rekonfiguracji czy optymalizacji:
+
+\begin{itemize}
+    \item Przykładem mogą być pojazdy autonomiczne (np. podwodne roboty inspekcyjne), których sterownik może dynamicznie przełączać tryby działania – np. powrót do stacji ładowania przy niskim poziomie energii, czy wybór mniej energochłonnego algorytmu wykrywania przeszkód w przypadku rosnących trudności środowiskowych ;
+    \item W chmurze obliczeniowej takie mechanizmy wykorzystywane są do dynamicznej alokacji zasobów, rekonfiguracji po awariach, czy inteligentnego dostrajania parametrów usług w odpowiedzi na nieprzewidywalne zmiany obciążenia .
+\end{itemize}
+
+Badania naukowe wskazują, że skuteczność samoadaptacji i autonomiczności w systemach rozproszonych w dużej mierze zależy od efektywności sprzężenia zwrotnego, precyzyjnego modelowania stanu systemu oraz algorytmów decyzyjnych uwzględniających zarówno aspekty wydajnościowe, jak i bezpieczeństwo czy energooszczędność.
+
+Rozwój autonomicznych i samoadaptacyjnych systemów w chmurze znajduje potwierdzenie w licznych badaniach, zarówno w obszarze zastosowań przemysłowych, jak i rozwoju koncepcji architektonicznych oraz formalnych metod modelowania, analiz i walidacji poprawności działania tych systemów. To właśnie te interdyscyplinarne innowacje – czerpiące z tradycyjnej automatyki, inżynierii oprogramowania, robotyki czy informatyki stosowanej – umożliwiają konsekwentną automatyzację i dalszy rozwój chmury obliczeniowej.
+
+
