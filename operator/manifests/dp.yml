@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keda-tuner-operator
+  namespace: default
+  labels:
+    app: keda-tuner-operator
+spec:
+  replicas: 1
+  # Ważne: Recreate zapobiega wyścigom, gdyby przypadkiem uruchomiły się dwie instancje
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: keda-tuner-operator
+  template:
+    metadata:
+      labels:
+        app: keda-tuner-operator
+      annotations:
+        # Aby Prometheus mógł (opcjonalnie) monitorować samego operatora
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9115"
+    spec:
+      serviceAccount: shell-operator
+      containers:
+        - name: operator
+          # Tutaj wstaw nazwę zbudowanego obrazu z poprzedniego kroku
+          image: registry.mgr.kokoszka.cloud/mgr/mgr-operator:2.0
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          env:
+            # --- KONFIGURACJA LOGIKI ---
+            
+            # Adres Prometheusa (użyj pełnej nazwy DNS klastra)
+            # Format: http://<service-name>.<namespace>.svc:9090
+            - name: PROMETHEUS_URL
+              value: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
+
+            # Nazwa serwisu Istio do śledzenia w metrykach (label destination_service_name)
+            - name: SERVICE_NAME
+              value: "workload-app-service"
+
+            # Nazwa ScaledObject, którym sterujemy
+            - name: TARGET_SO_NAME
+              value: "workload-app-so"
+
+            # Namespace, w którym działa aplikacja i ScaledObject
+            # Pobieramy dynamicznie z metadanych poda (Downward API)
+            - name: TARGET_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+            # Czas startu aplikacji (w sekundach) - baza dla algorytmu
+            - name: APP_STARTUP_TIME
+              value: "30"
+
+            # (Opcjonalnie) Konfiguracja logowania shell-operatora
+            - name: LOG_LEVEL
+              value: "info"
+            - name: LOG_TYPE
+              value: "color" # Lepsze dla systemów typu ELK/Loki

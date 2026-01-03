@@ -26,22 +26,22 @@ main() {
 
 usage() { echo "$(basename $0) usage:" && grep -E " .) \#" $0 2>/dev/null; exit 0; }
 
- deploy() {
-  podman build -t registry.mgr.kokoszka.cloud/mgr-runner/mgr-operator .
-  podman push registry.mgr.kokoszka.cloud/mgr-runner/mgr-operator
+deploy() {
+  podman build -t registry.mgr.kokoszka.cloud/mgr/mgr-operator:2.0 .
+  podman push registry.mgr.kokoszka.cloud/mgr/mgr-operator:2.0
   for m in `find manifests -type f`; do
     kubectl replace -f $m --force
   done
   sleep 2
   kubectl logs shell-operator -f
- }
+}
 
 
- logs() {
-   kubectl logs shell-operator | jq -r 'select(.msg) | "\(.time) | \(.msg)"' | tail
- }
+logs() {
+  kubectl logs shell-operator | jq -r 'select(.msg) | "\(.time) | \(.msg)"' | tail
+}
 
- print_log() {
+print_log() {
   STAMP=$(printf "0x%x" $(date "+%s%3N"))
   d=$(date +"%F %T.%03N")
   if [ $# -eq 0 ]; then

@@ -8,6 +8,6 @@ metadata:
 spec:
   containers:
   - name: shell-operator
-    image: registry.mgr.kokoszka.cloud/mgr-runner/mgr-operator
+    image: registry.mgr.kokoszka.cloud/mgr/mgr-operator
     imagePullPolicy: Always
   serviceAccountName: shell-operator
