@@ -1,7 +1,7 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: workload-app-scaledobject
+  name: workload-app-so
   namespace: default
 spec:
   scaleTargetRef:
@@ -19,7 +19,7 @@ spec:
         metricName: http_requests_total
         query: |
           sum(rate(http_requests_total{service="workload-app-service"}[1m]))
-        threshold: "10"           # skalowanie powyżej 10 req/s
+        threshold: "30"           # skalowanie powyżej 10 req/s
     - type: kubernetes-metrics
       metadata:
         # Typ pomiaru: Celuj w średnie wykorzystanie CPU.
