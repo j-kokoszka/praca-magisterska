@@ -35,3 +35,11 @@ spec:
           requests:
             cpu: 200m
             memory: 100M
+        readinessProbe:
+          httpGet:
+            path: /metrics    # The endpoint that should return 200
+            port: 8080        # Replace with your app's actual listening port
+          initialDelaySeconds: 5  # How long to wait before the first check
+          periodSeconds: 5        # How often to check
+          successThreshold: 1     # Minimum consecutive successes to be considered ready
+          failureThreshold: 3     # How many times to fail before marking unready

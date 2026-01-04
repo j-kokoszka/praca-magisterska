@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: workload-app-circuit-breaker
+  namespace: default  # Dobra praktyka: trzymaj to w tym samym namespace co serwis
+spec:
+  # Tuta wpisujemy wewnętrzny adres w klastrze:
+  host: workload-app-service.default.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      http:
+        http1MaxPendingRequests: 100
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 1s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 100

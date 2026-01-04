@@ -29,7 +29,7 @@ spec:
         metricName: istio_requests_total
         query: |
           sum(rate(istio_requests_total{service="workload-app-service"}[5s]))
-        threshold: "10"           
+        threshold: "50"           
 #     - type: kubernetes-metrics
 #       metadata:
 #         # Typ pomiaru: Celuj w średnie wykorzystanie CPU.

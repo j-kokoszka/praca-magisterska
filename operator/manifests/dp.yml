@@ -27,7 +27,7 @@ spec:
       containers:
         - name: operator
           # Tutaj wstaw nazwę zbudowanego obrazu z poprzedniego kroku
-          image: registry.mgr.kokoszka.cloud/mgr/mgr-operator:2.0
+          image: registry.mgr.kokoszka.cloud/mgr/mgr-operator:2.1
           imagePullPolicy: Always
           resources:
             requests:
@@ -61,10 +61,19 @@ spec:
 
             # Czas startu aplikacji (w sekundach) - baza dla algorytmu
             - name: APP_STARTUP_TIME
-              value: "30"
+              value: "10"
 
             # (Opcjonalnie) Konfiguracja logowania shell-operatora
             - name: LOG_LEVEL
               value: "info"
             - name: LOG_TYPE
               value: "color" # Lepsze dla systemów typu ELK/Loki
+
+            - name: DEBUG
+              value: "true"
+
+            - name: ERROR_THRESHOLD_LOW
+              value: "10"
+
+            - name: ERROR_THRESHOLD_HIGH
+              value: "20"
