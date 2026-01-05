@@ -1,0 +1,37 @@
+% Definicja języka YAML dla listings
+\lstdefinelanguage{yaml}{
+    keywords={true,false,null,y,n,yes,no,on,off},
+    keywordstyle=\color{blue},
+    basicstyle=\ttfamily\footnotesize,
+    sensitive=false,
+    comment=[l]{\#},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{orange},
+    moredelim=[l]{:},
+    morestring=[b]',
+    morestring=[b]",
+}
+
+% Styl dla YAML — analogiczny do cstyle
+\lstdefinestyle{yamlstyle}{
+    language=yaml,
+    backgroundcolor=\color{white},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!50!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    identifierstyle=\color{black},
+    numberstyle=\tiny\color{gray},
+    rulecolor=\color{black},
+    frame=single,
+    numbers=left,
+    showstringspaces=false,
+    showspaces=false,
+    showtabs=false,
+    tabsize=2,
+    title=\lstname
+}
+

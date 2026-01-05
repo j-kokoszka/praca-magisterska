@@ -1,0 +1,34 @@
+% Definicja stylu dla lstlisting dla języka YAML z zawijaniem linii
+\lstdefinelanguage{yaml}{
+    keywords={true,false,null,y,n,yes,no,on,off},
+    keywordstyle=\color{blue},
+    comment=[l]{\#},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{orange},
+    sensitive=false,
+    moredelim=[l]{:},
+}
+
+\lstdefinestyle{yamlstyle}{
+    language=yaml, % Wybór języka YAML
+    backgroundcolor=\color{white}, % Kolor tła
+    basicstyle=\ttfamily\footnotesize, % Podstawowy styl czcionki
+    breakatwhitespace=true, % Dziel wiersze w miejscach spacji
+    breaklines=true, % Automatyczne zawijanie długich linii
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}, % Znak na początku nowej linii po zawinięciu
+    captionpos=b, % Położenie podpisu (bottom)
+    commentstyle=\color{green!50!black}, % Styl komentarzy
+    keywordstyle=\color{blue}, % Styl słów kluczowych
+    stringstyle=\color{orange}, % Styl stringów
+    identifierstyle=\color{black}, % Styl identyfikatorów
+    numberstyle=\tiny\color{gray}, % Styl numerów linii
+    rulecolor=\color{black}, % Kolor ramki
+    frame=single, % Ramka wokół kodu
+    numbers=left, % Numerowanie linii po lewej stronie
+    showstringspaces=false, % Nie pokazuj odstępów w stringach
+    showspaces=false, % Nie pokazuj odstępów w kodzie
+    showtabs=false, % Nie pokazuj tabulatorów jako spacji
+    tabsize=2, % Rozmiar tabulatora w YAML zwykle 2
+    title=\lstname % Wyświetl nazwę pliku jako tytuł
+}
+

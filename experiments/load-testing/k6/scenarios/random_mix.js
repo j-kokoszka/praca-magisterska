@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { sleep } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:8000';
+const BASE_URL = __ENV.BASE_URL || 'https://workload-app.mgr.kokoszka.cloud';
 const VUS = __ENV.VUS || 10;
 const DURATION = __ENV.DURATION || '30s';
 

@@ -1,8 +1,8 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:8000';
-const VUS = __ENV.VUS || 5;
+const BASE_URL = __ENV.BASE_URL || 'https://workload-app.mgr.kokoszka.cloud';
+const VUS = __ENV.VUS || 40;
 const DURATION = __ENV.DURATION || '30s';
 
 export let options = {
