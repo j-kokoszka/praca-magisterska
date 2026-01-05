@@ -1,39 +1,106 @@
 
-\subsection{Architektura i koncepcje Kubernetesa}
+% \subsection{Architektura i koncepcje Kubernetesa}
+% 
+% Kubernetes, będący otwartym systemem do automatyzacji wdrażania, skalowania oraz zarządzania aplikacjami
+% kontenerowymi, stanowi obecnie dominującą platformę orkiestracyjną w ekosystemach chmurowych. Jego
+% architektura opiera się na modelu \emph{master--node}, w którym \textbf{klaster Kubernetesa} składa się
+% z \gls{controlplane}, zazwyczaj uruchamianej na węzłach typu \emph{master}, oraz z wielu \gls{workernode},
+% na których działają kontenery z aplikacjami.
+% 
+% \subsubsection{Podstawowe komponenty: control plane, nodes, pods, deployments, services}
+% 
+% \gls{controlplane} obejmuje kluczowe komponenty systemowe, takie jak \textbf{kube-apiserver},
+% który udostępnia interfejs API Kubernetesa i stanowi centralny punkt komunikacji w klastrze;
+% \textbf{kube-scheduler}, odpowiedzialny za przydzielanie nowo tworzonych \gls{pod} do odpowiednich
+% węzłów; \textbf{kube-controller-manager}, zarządzający zestawem kontrolerów realizujących logikę
+% utrzymania pożądanego stanu systemu (m.in. kontroler replikacji czy kontroler punktów końcowych);
+% oraz \textbf{etcd}, będący rozproszoną bazą danych typu klucz--wartość, przechowującą aktualny stan
+% klastra.
+% 
+% Każdy \gls{workernode} zawiera komponent \textbf{kubelet}, pełniący rolę agenta komunikującego się
+% z płaszczyzną sterowania oraz zarządzającego cyklem życia podów i kontenerów na danym węźle,
+% a także \textbf{kube-proxy}, który odpowiada za implementację reguł sieciowych dla \gls{service},
+% umożliwiając komunikację pomiędzy podami oraz dostęp do usług zewnętrznych.
+% 
+% \subsubsection{Mechanizmy rozszerzeń: CRDs i operatory}
+% 
+% Kubernetes operuje na zestawie abstrakcji, takich jak \gls{pod}, stanowiące najmniejszą jednostkę
+% wdrożeniową i grupujące jeden lub więcej kontenerów; \gls{deployment}, zapewniające deklaratywne
+% zarządzanie stanem aplikacji, w tym automatyzację aktualizacji oraz wycofywania zmian; oraz
+% \gls{service}, będące abstrakcjami sieciowymi definiującymi logiczny zbiór podów oraz politykę
+% dostępu do nich.
+% 
+% Elastyczność platformy jest dodatkowo rozszerzana poprzez mechanizmy takie jak \gls{crd}, które
+% umożliwiają definiowanie własnych obiektów API i integrację niestandardowych zasobów z natywnym
+% modelem sterowania Kubernetesa. Na ich bazie budowane są \gls{operator}, czyli komponenty
+% oprogramowania enkapsulujące wiedzę domenową i automatyzujące zarządzanie złożonymi aplikacjami
+% oraz ich cyklem życia w klastrze. Zrozumienie tych fundamentalnych elementów stanowi podstawę do
+% analizy mechanizmów autonomicznego sterowania, które wykorzystują i rozszerzają natywne możliwości
+% platformy Kubernetes.
 
-Kubernetes, będący otwartym systemem do automatyzacji wdrażania, skalowania oraz zarządzania aplikacjami
-kontenerowymi, stanowi obecnie dominującą platformę orkiestracyjną w ekosystemach chmurowych. Jego
-architektura opiera się na modelu \emph{master--node}, w którym \textbf{klaster Kubernetesa} składa się
-z \gls{controlplane}, zazwyczaj uruchamianej na węzłach typu \emph{master}, oraz z wielu \gls{workernode},
-na których działają kontenery z aplikacjami.
+\subsection{Architektura i koncepcje platformy Kubernetes}
 
-\subsubsection{Podstawowe komponenty: control plane, nodes, pods, deployments, services}
+Kubernetes (często zapisywany jako K8s) to platforma orkiestracji kontenerów typu open-source, 
+służąca do automatyzacji wdrażania, skalowania i zarządzania aplikacjami. System ten wywodzi się 
+bezpośrednio z wewnętrznego systemu zarządzania klastrami firmy Google o nazwie Borg 
+\cite{verma2015large} i opiera się na dekadzie doświadczeń w uruchamianiu systemów produkcyjnych 
+na masową skalę.
 
-\gls{controlplane} obejmuje kluczowe komponenty systemowe, takie jak \textbf{kube-apiserver},
-który udostępnia interfejs API Kubernetesa i stanowi centralny punkt komunikacji w klastrze;
-\textbf{kube-scheduler}, odpowiedzialny za przydzielanie nowo tworzonych \gls{pod} do odpowiednich
-węzłów; \textbf{kube-controller-manager}, zarządzający zestawem kontrolerów realizujących logikę
-utrzymania pożądanego stanu systemu (m.in. kontroler replikacji czy kontroler punktów końcowych);
-oraz \textbf{etcd}, będący rozproszoną bazą danych typu klucz--wartość, przechowującą aktualny stan
-klastra.
+Fundamentalną cechą Kubernetesa jest jego deklaratywny model konfiguracji. W przeciwieństwie do 
+podejścia imperatywnego, gdzie administrator definiuje sekwencję kroków do wykonania, w 
+Kubernetesie definiuje się \textit{stan pożądany} (ang. \textit{desired state}) systemu. Platforma, 
+poprzez ciągłe pętle kontrolne (ang. \textit{control loops}), autonomicznie podejmuje działania 
+zmierzające do uzgodnienia stanu rzeczywistego ze zdefiniowanym \cite{burns2019kubernetes}.
 
-Każdy \gls{workernode} zawiera komponent \textbf{kubelet}, pełniący rolę agenta komunikującego się
-z płaszczyzną sterowania oraz zarządzającego cyklem życia podów i kontenerów na danym węźle,
-a także \textbf{kube-proxy}, który odpowiada za implementację reguł sieciowych dla \gls{service},
-umożliwiając komunikację pomiędzy podami oraz dostęp do usług zewnętrznych.
+\subsubsection{Komponenty płaszczyzny sterowania i węzłów roboczych}
 
-\subsubsection{Mechanizmy rozszerzeń: CRDs i operatory}
+Architektura klastra opiera się na modelu \textit{master-node}, w którym wyróżniamy warstwę sterującą 
+(\gls{controlplane}) oraz warstwę wykonawczą (\gls{workernode}).
 
-Kubernetes operuje na zestawie abstrakcji, takich jak \gls{pod}, stanowiące najmniejszą jednostkę
-wdrożeniową i grupujące jeden lub więcej kontenerów; \gls{deployment}, zapewniające deklaratywne
-zarządzanie stanem aplikacji, w tym automatyzację aktualizacji oraz wycofywania zmian; oraz
-\gls{service}, będące abstrakcjami sieciowymi definiującymi logiczny zbiór podów oraz politykę
-dostępu do nich.
+\textbf{\Gls{controlplane}} (płaszczyzna sterowania) zarządza stanem klastra i podejmuje globalne 
+decyzje (np. o planowaniu zadań). W jej skład wchodzą:
+\begin{itemize}
+    \item \textbf{kube-apiserver}: Centralny komponent udostępniający interfejs REST API. Stanowi 
+      "front-end" dla płaszczyzny sterowania i jako jedyny komunikuje się bezpośrednio z bazą 
+      danych klastra \cite{kubernetes_docs}.
+    \item \textbf{etcd}: Spójna, wysokodostępna baza danych typu klucz-wartość (ang. \textit{key-value store}), 
+      wykorzystywana do trwałego przechowywania wszystkich danych klastra, w tym konfiguracji i stanu 
+      obiektów.
+    \item \textbf{kube-scheduler}: Komponent odpowiedzialny za obserwację nowo utworzonych podów, 
+      które nie mają przypisanego węzła, i wybór optymalnego \gls{workernode} do ich uruchomienia. 
+      Decyzja ta opiera się na analizie dostępnych zasobów, polityk \textit{affinity} oraz ograniczeń 
+      sprzętowych \cite{k8s_scheduling}.
+    \item \textbf{kube-controller-manager}: Proces uruchamiający podstawowe pętle kontrolne klastra 
+      (np. Node Controller, Replication Controller). Każdy kontroler jest odpowiedzialny za obserwację 
+      konkretnego aspektu stanu klastra i reagowanie na odchylenia.
+\end{itemize}
 
-Elastyczność platformy jest dodatkowo rozszerzana poprzez mechanizmy takie jak \gls{crd}, które
-umożliwiają definiowanie własnych obiektów API i integrację niestandardowych zasobów z natywnym
-modelem sterowania Kubernetesa. Na ich bazie budowane są \gls{operator}, czyli komponenty
-oprogramowania enkapsulujące wiedzę domenową i automatyzujące zarządzanie złożonymi aplikacjami
-oraz ich cyklem życia w klastrze. Zrozumienie tych fundamentalnych elementów stanowi podstawę do
-analizy mechanizmów autonomicznego sterowania, które wykorzystują i rozszerzają natywne możliwości
-platformy Kubernetes.
+\textbf{\Gls{workernode}} (węzeł roboczy) to maszyna (fizyczna lub wirtualna), na której uruchamiane są 
+aplikacje. Kluczowe komponenty węzła to:
+\begin{itemize}
+    \item \textbf{kubelet}: Agent działający na każdym węźle, który przyjmuje specyfikacje \gls{pod} 
+      (zwykle od API servera) i zapewnia, że opisane w nich kontenery są uruchomione i działają poprawnie. 
+      Realizuje on lokalną pętlę uzgadniania stanu na poziomie węzła \cite{kubernetes_architecture}.
+    \item \textbf{kube-proxy}: Komponent sieciowy obsługujący reguły sieciowe na węźle. Umożliwia 
+      komunikację sieciową do podów z wnętrza i spoza klastra, implementując mechanizm \gls{service}.
+    \item \textbf{Container Runtime}: Oprogramowanie odpowiedzialne za uruchamianie kontenerów 
+      (np. containerd, CRI-O).
+\end{itemize}
+
+\subsubsection{Abstrakcje i obiekty API}
+
+Kubernetes wprowadza warstwę abstrakcji nad infrastrukturą sprzętową, operując na obiektach logicznych:
+
+\begin{itemize}
+    \item \textbf{\Gls{pod}}: Najmniejsza, atomowa jednostka wdrożeniowa w Kubernetesie. Pod reprezentuje pojedynczą instancję procesu w klastrze i może składać się z jednego lub wielu ściśle powiązanych kontenerów, współdzielących zasoby pamięci masowej i sieciowej (wspólny adres IP).
+    \item \textbf{\Gls{deployment}}: Obiekt wyższego poziomu zarządzający replikowanymi aplikacjami. Umożliwia deklaratywne aktualizacje (np. \textit{Rolling Update}) oraz skalowanie liczby replik Podów. To właśnie na poziomie Deploymentu najczęściej definiowane są limity zasobów (CPU/RAM), które są przedmiotem optymalizacji w niniejszej pracy.
+    \item \textbf{\Gls{service}}: Abstrakcja definiująca logiczny zbiór Podów oraz politykę dostępu do nich (zazwyczaj jako stały adres IP i nazwa DNS). Zapewnia to luźne powiązanie (ang. \textit{loose coupling}) między zależnymi mikroserwisami.
+\end{itemize}
+
+\subsubsection{Mechanizmy rozszerzeń: CRD i Wzorzec Operatora}
+
+Jedną z najistotniejszych cech architektury Kubernetes jest jej rozszerzalność. Mechanizm \textbf{\gls{crd}} pozwala użytkownikom na definiowanie nowych typów zasobów, które są obsługiwane przez API server na równi z zasobami natywnymi (takimi jak Pod czy Service) \cite{kubernetes_crd}.
+
+Połączenie niestandardowego zasobu (\gls{crd}) z dedykowanym kontrolerem, który w pętli monitoruje ten zasób, dało początek tzw. \textbf{Wzorcowi Operatora} (ang. \textit{Operator Pattern}). W literaturze przedmiotu Operator definiowany jest jako metoda pakowania, wdrażania i zarządzania aplikacją Kubernetes, która programowo kodyfikuje wiedzę operacyjną niezbędną do utrzymania usługi \cite{dobies2020operators}.
+W kontekście niniejszej pracy, koncepcja ta jest kluczowa – projektowany \textit{Smart Tuner} jest w istocie operatorem, który wykorzystuje \gls{crd} do przechowywania konfiguracji i autonomicznie steruje parametrami standardowych mechanizmów \gls{hpa} oraz limitami zasobów, zastępując w tym procesie człowieka.
+

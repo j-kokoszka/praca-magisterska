@@ -5,110 +5,111 @@
 \subsection{Wprowadzenie do problematyki}
 
 Dynamiczny rozwój technologii chmurowych oraz wzrost złożoności systemów rozproszonych 
-stanowią wyzwanie dla efektywnego zarządzania zasobami i zapewnienia niezawodności usług. 
+stanowią wyzwanie dla efektywnego zarządzania zasobami i zapewnienia niezawodności usług.
 W dobie mikroserwisów i architektur opartych na kontenerach, platformy takie jak 
 \Gls{kubernetes} stały się de facto standardem w orkiestracji aplikacji, umożliwiając 
-deklaratywne zarządzanie infrastrukturą. Niemniej jednak, samo wdrożenie aplikacji w 
+deklaratywne zarządzanie infrastrukturą.
+Niemniej jednak, samo wdrożenie aplikacji w 
 \Gls{kubernetes}ie nie gwarantuje optymalnego wykorzystania zasobów ani automatycznego 
-dostosowywania się do zmieniających się warunków obciążenia. Konieczność manualnego 
-skalowania lub konfiguracji parametrów alokacji zasobów prowadzi do nieefektywności 
+dostosowywania się do zmieniających się warunków obciążenia.
+Konieczność manualnego 
+skalowania lub sztywnej konfiguracji parametrów alokacji zasobów prowadzi do nieefektywności 
 operacyjnej, zwiększonych kosztów oraz potencjalnych przestojów, wynikających z 
-niedoszacowania lub przeszacowania potrzeb zasobowych. Współczesne systemy wymagają 
+niedoszacowania lub przeszacowania potrzeb zasobowych.
+Współczesne systemy wymagają 
 mechanizmów, które autonomicznie adaptują się do dynamicznych zmian w środowisku, 
-minimalizując interwencję człowieka. W tym kontekście, autonomiczne pętle sterowania 
+minimalizując interwencję człowieka.
+W tym kontekście, autonomiczne pętle sterowania 
 cyklem życia usług, zdolne do monitorowania, analizowania, planowania i wykonywania 
-akcji bez nadzoru, stają się kluczowe dla osiągnięcia wysokiej dostępności, wydajności 
-i ekonomiczności w środowiskach kontenerowych, co potwierdzają liczne badania w 
-dziedzinie samoadaptujących się systemów. Poszukiwanie innowacyjnych rozwiązań, które 
-efektywnie zarządzają skalowaniem i alokacją zasobów, stanowi zatem istotny obszar 
+akcji bez nadzoru (model \Gls{mapek}), stają się kluczowe dla osiągnięcia wysokiej dostępności, wydajności 
+i ekonomiczności w środowiskach kontenerowych.
+Poszukiwanie innowacyjnych rozwiązań, które 
+efektywnie łączą skalowanie poziome z pionowym, stanowi zatem istotny obszar 
 badań, mający bezpośrednie przełożenie na stabilność i efektywność nowoczesnych 
 aplikacji chmurowych.
 
 \subsection{Kontekst i motywacja wyboru tematu}
 
 Współczesne środowiska chmurowe charakteryzują się rosnącą złożonością oraz dynamicznie 
-zmieniającym się obciążeniem aplikacji. Przedsiębiorstwa coraz częściej migrują swoje 
-systemy do architektur mikroserwisowych opartych na kontenerach, zarządzanych przez 
-platformy orkiestracyjne takie jak \Gls{kubernetes}. Umożliwia to znaczące zwiększenie 
-elastyczności, skalowalności oraz efektywności operacyjnej. Jednocześnie jednak 
-zarządzanie cyklem życia usług w tak dynamicznych ekosystemach stanowi istotne wyzwanie. 
-Tradycyjne, statyczne podejścia do przydzielania zasobów lub ręczne procesy skalowania 
-nie są w stanie efektywnie reagować na zmienne warunki obciążenia, prowadząc do 
-nieoptymalnego wykorzystania zasobów lub spadków wydajności w momentach szczytowego 
-ruchu.
+zmieniającym się obciążeniem aplikacji.
+Migracja do architektur mikroserwisowych 
+umożliwia zwiększenie elastyczności, jednak rodzi wyzwania w zarządzaniu wydajnością.
+Tradycyjne, reaktywne podejścia do przydzielania zasobów często okazują się niewystarczające.
+W środowisku \Gls{kubernetes} standardem stały się mechanizmy takie jak \Gls{hpa} (skalowanie poziome) 
+oraz \Gls{vpa} (skalowanie pionowe). Coraz większą popularność zyskuje również \Gls{keda}, 
+umożliwiająca skalowanie sterowane zdarzeniami i metrykami zewnętrznymi.
+Każde z tych rozwiązań posiada jednak swoje ograniczenia, gdy jest stosowane w izolacji. 
+\Gls{hpa} skutecznie obsługuje wzrost ruchu poprzez dodawanie replik, ale nie optymalizuje 
+kosztownych zasobów pojedynczego kontenera. Z kolei \Gls{vpa} potrafi dostosować wielkość kontenera, 
+lecz jego czas reakcji bywa zbyt wolny w sytuacjach nagłych skoków obciążenia (tzw. \textit{spikes}), 
+a proces aktualizacji wiąże się często z restartem podów.
+Co więcej, jednoczesne użycie \Gls{hpa} i \Gls{vpa} na tych samych metrykach 
+(np. CPU) jest niezalecane i prowadzi do konfliktów sterowania.
 
-W odpowiedzi na te wyzwania, w środowisku \Gls{kubernetes} rozwijane są różne mechanizmy 
-automatycznego skalowania, takie jak \Gls{hpa}, \Gls{vpa} czy \Gls{keda}. Każdy z nich 
-posiada jednak swoje ograniczenia — \Gls{hpa} skupia się głównie na skalowaniu replik, 
-ignorując możliwości optymalizacji zasobów pojedynczego kontenera, podczas gdy \Gls{vpa} 
-dokonuje zmian w przydziale zasobów, lecz nie radzi sobie dobrze w sytuacjach nagłych 
-skoków obciążenia. W rezultacie żadne z tych rozwiązań nie zapewnia optymalnego balansu 
-między stabilnością, wydajnością a kosztami w zróżnicowanych warunkach pracy aplikacji.
-
-Motywacją do podjęcia tematu pracy magisterskiej jest potrzeba opracowania autonomicznego 
-mechanizmu, który byłby w stanie samodzielnie i dynamicznie decydować o wyborze właściwej 
-strategii skalowania w zależnośc
+Motywacją do podjęcia tematu pracy jest potrzeba opracowania autonomicznego mechanizmu hybrydowego, 
+który zamiast wybierać jedną metodę, potrafi inteligentnie koordynować strategię skalowania. 
+Istnieje zapotrzebowanie na operatora, który w zależności od stabilności systemu (analiza błędów, 
+trendów obciążenia) potrafi dynamicznie dostrajać parametry skalowania poziomego (np. częstotliwość 
+próbkowania w \Gls{keda}) oraz samodzielnie korygować limity zasobów (CPU), ucząc się 
+minimalnego zapotrzebowania aplikacji.
 
 \subsection{Cel pracy i problemy badawcze}
 
-Głównym celem niniejszej pracy magisterskiej jest opracowanie, implementacja oraz ewaluacja 
-autonomicznego operatora \Gls{kubernetes}, zdolnego do dynamicznego wyboru między pionowym 
-\Gls{vpa} a poziomym \Gls{hpa} skalowaniem na podstawie bieżących warunków obciążenia oraz 
-zdefiniowanej polityki. Realizacja tego celu ma na celu wykazanie, że zastosowanie pętli 
-sterującej opartej na modelu \Gls{mapek} może prowadzić do zwiększenia efektywności 
-wykorzystania zasobów oraz stabilności działania usług w środowiskach chmurowych.
+Głównym celem niniejszej pracy magisterskiej jest zaprojektowanie, implementacja oraz ewaluacja 
+autonomicznego operatora dla platformy \Gls{kubernetes} (nazwanego w pracy \textit{Smart Tuner}), 
+zdolnego do dynamicznej optymalizacji procesu autoskalowania. Rozwiązanie to ma na celu 
+połączenie zalet skalowania poziomego opartego na zdarzeniach (\Gls{keda}) z aktywnym zarządzaniem 
+zasobami pionowymi, w oparciu o bieżącą analizę metryk wydajnościowych (np. \textit{error rate}).
 
-Praca zakłada analizę istniejących mechanizmów automatycznego skalowania w ekosystemie 
-\Gls{kubernetes}, takich jak \Gls{hpa} oraz \Gls{vpa} w celu identyfikacji ich ograniczeń 
-i obszarów wymagających ulepszenia. Na tej podstawie zaprojektowane zostanie autorskie 
-rozwiązanie w postaci operatora, który – korzystając z dedykowanego zasobu \Gls{crd} – 
-będzie decydował o aktywacji odpowiedniego mechanizmu skalowania w sposób autonomiczny, 
-zależny od bieżących danych metrycznych i ustalonej polityki działania. Celem końcowym 
-jest porównanie skuteczności zaproponowanego podejścia z istniejącymi metodami w kontekście 
-wydajności, stabilności oraz efektywności kosztowej.
+Realizacja pracy obejmuje dwa kluczowe etapy:
+\begin{enumerate}
+    \item Przeprowadzenie badań porównawczych i analizy wydajności istniejących mechanizmów skalowania: 
+      \Gls{hpa}, \Gls{vpa} oraz \Gls{keda} w zróżnicowanych scenariuszach obciążenia.
+    \item Opracowanie i wdrożenie autorskiego algorytmu sterującego, który na podstawie pętli sprzężenia 
+      zwrotnego dobiera optymalną strategię (tryby: \textit{Panic}, \textit{Unstable}, \textit{Stable}),
+      manipulując parametrami reaktywności skalera oraz alokacją CPU.
+\end{enumerate}
 
-W kontekście powyższych założeń, niniejsza praca stawia następujące \textbf{problemy badawcze}:
+W kontekście powyższych założeń, sformułowano następujące problemy badawcze:
 
 \begin{enumerate}
-    \item Jakie są ograniczenia istniejących mechanizmów skalowania w \Gls{kubernetes}ie 
-    (\Gls{hpa}, \Gls{vpa}) w kontekście efektywności wykorzystania zasobów oraz zdolności 
-    adaptacyjnych do dynamicznie zmieniających się obciążeń?
+    \item Jakie są granice wydajności i ograniczenia reaktywności standardowych mechanizmów (\Gls{hpa}, 
+      \Gls{vpa}, \Gls{keda}) w obliczu nagłych oraz fluktuujących zmian obciążenia?
     
-    \item W jaki sposób autonomiczny operator, wykorzystujący model \Gls{mapek}, może podejmować 
-    decyzje o wyborze odpowiedniego typu skalowania (\Gls{hpa} lub \Gls{vpa}), aby poprawić 
-    stabilność i efektywność pracy usług?
+    \item Czy zastosowanie autonomicznego operatora, który dynamicznie modyfikuje parametry skalowania 
+      (np. interwały odpytywania, progi obciążenia) w reakcji na wykryte błędy aplikacji, pozwala na 
+      szybszą stabilizację systemu niż statyczna konfiguracja?
     
-    \item Czy zaproponowane rozwiązanie pozwala uzyskać lepsze rezultaty w zakresie 
-    \textbf{wydajności, stabilności i kosztów} w porównaniu do istniejących mechanizmów 
-    autoskalowania?
+    \item W jaki sposób zaimplementować mechanizm "uczenia się" minimalnych zasobów (ang. 
+      \textit{learned min CPU}), aby bezpiecznie redukować koszty w okresach stabilnej pracy, nie 
+      ryzykując degradacji wydajności?
     
-    \item Jakie metryki i kryteria oceny należy przyjąć, aby w sposób obiektywny zmierzyć 
-    skuteczność działania autonomicznego operatora w środowisku zbliżonym do produkcyjnego?
+    \item Czy podejście hybrydowe (jednoczesne sterowanie parametrami \Gls{keda} i alokacją zasobów 
+      Deploymentu) zapewnia korzystniejszy stosunek wydajności do kosztów (utylizacji zasobów) w porównaniu 
+      do klasycznego podejścia opartego wyłącznie na \Gls{hpa}?
+    
 \end{enumerate}
 
 
 \subsection{Hipotezy badawcze}
 
-W kontekście zdefiniowanej tezy głównej oraz szczegółowych celów i problemów badawczych, 
-sformułowano następujące hipotezy, które zostaną zweryfikowane w trakcie przeprowadzonych 
-eksperymentów i analiz:
+W oparciu o zdefiniowane cele i problemy badawcze, postawiono następujące hipotezy:
 
 \begin{enumerate}
-    \item \textbf{Istniejące mechanizmy skalowania w \Gls{kubernetes}ie}, takie jak \gls{hpa} 
-    i \gls{vpa}, pomimo swojej skuteczności w określonych scenariuszach, nie zapewniają optymalnego 
-    wykorzystania zasobów w warunkach dynamicznie zmieniającego się obciążenia. Ich ograniczona 
-    zdolność adaptacyjna może prowadzić do przeskalowania lub niedoskalowania aplikacji, a w 
-    konsekwencji do nieefektywności kosztowej lub pogorszenia jakości usług.
+    \item \textbf{Izolowane mechanizmy skalowania są niewystarczające w złożonych scenariuszach.} 
+    Statyczna konfiguracja \Gls{hpa} lub \Gls{keda} wymusza kompromis między szybkością reakcji a 
+    stabilnością (ryzyko oscylacji). Brak dynamicznej adaptacji parametrów (takich jak \textit{polling interval}) 
+    ogranicza efektywność w sytuacjach awaryjnych (tryb \textit{Panic}).
     
-    \item \textbf{Autonomiczny operator \Gls{kubernetes}}, zaprojektowany i zaimplementowany 
-    w ramach niniejszej pracy, wykorzystujący model pętli sterującej \gls{mapek} do dynamicznego 
-    wyboru między \gls{hpa} a \gls{vpa}, zapewni większą efektywność wykorzystania zasobów oraz 
-    wyższą stabilność działania usług w porównaniu do stosowania pojedynczych mechanizmów skalowania.
     
-    \item \textbf{Zastosowanie modelu \gls{mapek}} w procesie zarządzania cyklem życia usług 
-    pozwoli na zwiększenie autonomii systemu i redukcję konieczności interwencji manualnej, 
-    co przyczyni się do ograniczenia kosztów operacyjnych oraz poprawy dostępności i niezawodności 
-    aplikacji działających w środowisku chmurowym.
+    \item \textbf{Autonomiczna koordynacja skalowania poziomego i pionowego poprawia niezawodność.} 
+    Zastosowanie autorskiego operatora, który w momentach niestabilności agresywnie zwiększa zasoby 
+    i częstotliwość skalowania, a w momentach spokoju relaksuje te parametry, pozwoli na znaczącą 
+    redukcję poziomu błędów (HTTP 5xx) przy nagłych skokach ruchu.
+    
+    
+    \item \textbf{Dynamiczne dostrajanie zasobów pozwala na oszczędności bez utraty QoS.} 
+    Mechanizm iteracyjnego uczenia się dolnego limitu zasobów (CPU) w okresach stabilnej pracy pozwoli 
+    na osiągnięcie wyższego stopnia utylizacji klastra (redukcja kosztów) w porównaniu do statycznie 
+    nadwymiarowanych kontenerów, przy zachowaniu akceptowalnego poziomu SLA.
 \end{enumerate}
-
-

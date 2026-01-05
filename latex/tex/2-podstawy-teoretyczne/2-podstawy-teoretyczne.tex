@@ -1,24 +1,62 @@
+% \newpage
+% 
+% \section{Podstawy Teoretyczne i Przegląd Literatury}
+% 
+% Niniejszy rozdział ma na celu przedstawienie kluczowych koncepcji teoretycznych oraz przegląd
+% istniejącej literatury naukowej, niezbędnych do pełnego zrozumienia problematyki autonomicznego
+% sterowania cyklem życia usług w środowisku Kubernetes. Rozpoczyna się od omówienia podstaw architektury
+% Kubernetesa, jego komponentów oraz mechanizmów rozszerzeń, takich jak \gls{crd}, które stanowią
+% platformę dla implementowanych rozwiązań. Następnie, w kontekście rosnącej złożoności systemów
+% rozproszonych, przedstawione zostaną fundamentalne zasady automatyzacji zarządzania zasobami,
+% ze szczególnym uwzględnieniem koncepcji pętli sterowania oraz systemów samoadaptujących się.
+% 
+% Kluczową częścią rozdziału jest szczegółowy przegląd i analiza istniejących mechanizmów skalowania
+% w Kubernetesie, takich jak \gls{vpa}, \gls{hpa} oraz \gls{keda}, z uwzględnieniem ich zasad działania,
+% ograniczeń i typowych zastosowań. Rozwiązania te zostaną przeanalizowane w kontekście automatycznego
+% zarządzania zasobami obliczeniowymi oraz reakcji systemu na zmienne obciążenie.
+% 
+% Rozdział zostanie uzupełniony o wprowadzenie do modelu \gls{mapek} (ang. \emph{\glsdesc{mapek}}),
+% który stanowi uznany paradygmat projektowania autonomicznych systemów zarządzania i będzie podstawą
+% do opracowania własnego rozwiązania w dalszych częściach pracy. Zebrana w tym rozdziale wiedza
+% teoretyczna stworzy solidne ramy dla przeprowadzenia badań empirycznych oraz analizy uzyskanych wyników.
+% 
+% \input{tex/2-podstawy-teoretyczne/2.1-architektura-i-koncepcje-kubernetesa.tex}
+% 
+% \input{tex/2-podstawy-teoretyczne/2.2-Automatyzacja-zarzadzania-zasobami-w-chmurze.tex}
+% 
+% \input{tex/2-podstawy-teoretyczne/2.3-przeglad-istniejacych-mechanizmow-skalowania-i-zarzadzania.tex}
+
+
+
+
+
+
+
 \newpage
 
 \section{Podstawy Teoretyczne i Przegląd Literatury}
 
-Niniejszy rozdział ma na celu przedstawienie kluczowych koncepcji teoretycznych oraz przegląd
-istniejącej literatury naukowej, niezbędnych do pełnego zrozumienia problematyki autonomicznego
-sterowania cyklem życia usług w środowisku Kubernetes. Rozpoczyna się od omówienia podstaw architektury
-Kubernetesa, jego komponentów oraz mechanizmów rozszerzeń, takich jak \gls{crd}, które stanowią
-platformę dla implementowanych rozwiązań. Następnie, w kontekście rosnącej złożoności systemów
-rozproszonych, przedstawione zostaną fundamentalne zasady automatyzacji zarządzania zasobami,
-ze szczególnym uwzględnieniem koncepcji pętli sterowania oraz systemów samoadaptujących się.
+Niniejszy rozdział stanowi fundament teoretyczny pracy, prezentując kluczowe koncepcje niezbędne 
+do zrozumienia problematyki autonomicznego zarządzania zasobami w systemach rozproszonych. Ze 
+względu na złożoność współczesnych środowisk chmurowych, właściwa analiza mechanizmów 
+sterowania wymaga interdyscyplinarnego podejścia, łączącego wiedzę z zakresu inżynierii 
+oprogramowania, teorii sterowania oraz architektury systemów operacyjnych \cite{burns2016kubernetes}.
 
-Kluczową częścią rozdziału jest szczegółowy przegląd i analiza istniejących mechanizmów skalowania
-w Kubernetesie, takich jak \gls{vpa}, \gls{hpa} oraz \gls{keda}, z uwzględnieniem ich zasad działania,
-ograniczeń i typowych zastosowań. Rozwiązania te zostaną przeanalizowane w kontekście automatycznego
-zarządzania zasobami obliczeniowymi oraz reakcji systemu na zmienne obciążenie.
+W pierwszej części rozdziału omówiona zostanie architektura platformy Kubernetes, ze szczególnym 
+uwzględnieniem jej deklaratywnego modelu zarządzania oraz możliwości rozszerzania poprzez \gls{crd} 
+i wzorzec Operatora. Zrozumienie tych mechanizmów jest kluczowe, gdyż stanowią one środowisko 
+uruchomieniowe dla projektowanego w dalszej części pracy rozwiązania.
 
-Rozdział zostanie uzupełniony o wprowadzenie do modelu \gls{mapek} (ang. \emph{\glsdesc{mapek}}),
-który stanowi uznany paradygmat projektowania autonomicznych systemów zarządzania i będzie podstawą
-do opracowania własnego rozwiązania w dalszych częściach pracy. Zebrana w tym rozdziale wiedza
-teoretyczna stworzy solidne ramy dla przeprowadzenia badań empirycznych oraz analizy uzyskanych wyników.
+Następnie przedstawione zostaną teoretyczne podstawy automatyzacji w chmurze, w tym koncepcja 
+pętli sterowania (ang. \textit{control loop}) oraz paradygmat systemów samoadaptujących się 
+(ang. \textit{self-adaptive systems}). W tym kontekście przeanalizowany zostanie model \gls{mapek}, 
+który dostarcza ustrukturyzowanych ram dla procesów monitorowania, analizy, planowania i egzekucji 
+zmian w systemie \cite{kephart2003vision}.
+
+Ostatnia część rozdziału zawiera krytyczny przegląd literatury dotyczącej istniejących mechanizmów 
+skalowania (\gls{hpa}, \gls{vpa}, \gls{keda}). Analiza ta pozwoli na zidentyfikowanie ich ograniczeń 
+w kontekście dynamicznie zmieniających się obciążeń oraz uzasadnienie potrzeby opracowania hybrydowego 
+podejścia do autoskalowania.
 
 \input{tex/2-podstawy-teoretyczne/2.1-architektura-i-koncepcje-kubernetesa.tex}
 
@@ -26,37 +64,10 @@ teoretyczna stworzy solidne ramy dla przeprowadzenia badań empirycznych oraz an
 
 \input{tex/2-podstawy-teoretyczne/2.3-przeglad-istniejacych-mechanizmow-skalowania-i-zarzadzania.tex}
 
+\input{tex/2-podstawy-teoretyczne/2.4-Model-MAPE-K-w-systemach-samozarzadzajacych.tex}
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-% \subsection{Automatyzacja Zarządzania Zasobami w Chmurze}
-% 
-% \subsubsection{Pojęcie pętli sterowania (Control Loops) w systemach rozproszonych}
-% 
-% \subsubsection{Autonomiczne systemy i samoadaptacja}
-
-% \subsection{Przegląd Istniejących Mechanizmów Skalowania i Zarządzania}
-
-% \subsubsection{Vertical Pod Autoscaler (VPA): zasada działania, ograniczenia, zastosowania}
-
-% \subsubsection{Horizontal Pod Autoscaler (HPA): zasada działania, metryki, skalowanie oparte na obciążeniu}
-
-% \subsubsection{Kubernetes Event-driven Autoscaling (KEDA): integracja z brokerami zdarzeń, scenariusze użycia}
-
-% \subsection{Model MAPE-K w Systemach Samozarządzających}
-
-% \subsubsection{Monitor, Analyze, Plan, Execute, Knowledge}
-
-% \subsubsection{Aplikacja modelu MAPE-K w zarządzaniu usługami}

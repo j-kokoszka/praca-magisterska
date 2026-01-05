@@ -1,61 +1,220 @@
-\subsection{Przegląd Istniejących Mechanizmów Skalowania i Zarządzania}
-W kontekście dynamicznego środowiska Kubernetesa, efektywne zarządzanie zasobami i skalowanie aplikacji jest kluczowe dla zapewnienia wydajności, stabilności oraz optymalizacji kosztów. Kubernetes oferuje natywne mechanizmy automatycznego skalowania, które pozwalają na dostosowanie liczby instancji aplikacji (skalowanie horyzontalne) oraz zasobów przydzielonych pojedynczym instancjom (skalowanie wertykalne) w odpowiedzi na zmieniające się zapotrzebowanie. Ponadto, ekosystem Kubernetesa jest stale rozwijany o rozwiązania zewnętrzne, które rozszerzają te możliwości, umożliwiając skalowanie oparte na zdarzeniach pochodzących z różnych źródeł. Poniższe podsekcje przedstawiają szczegółową analizę kluczowych mechanizmów używanych do autonomicznego skalowania w Kubernetesie.
+% \subsection{Przegląd Istniejących Mechanizmów Skalowania i Zarządzania}
+% W kontekście dynamicznego środowiska Kubernetesa, efektywne zarządzanie zasobami i skalowanie aplikacji jest kluczowe dla zapewnienia wydajności, stabilności oraz optymalizacji kosztów. Kubernetes oferuje natywne mechanizmy automatycznego skalowania, które pozwalają na dostosowanie liczby instancji aplikacji (skalowanie horyzontalne) oraz zasobów przydzielonych pojedynczym instancjom (skalowanie wertykalne) w odpowiedzi na zmieniające się zapotrzebowanie. Ponadto, ekosystem Kubernetesa jest stale rozwijany o rozwiązania zewnętrzne, które rozszerzają te możliwości, umożliwiając skalowanie oparte na zdarzeniach pochodzących z różnych źródeł. Poniższe podsekcje przedstawiają szczegółową analizę kluczowych mechanizmów używanych do autonomicznego skalowania w Kubernetesie.
+% 
+% \subsubsection{Vertical Pod Autoscaler (VPA): zasada działania, ograniczenia, zastosowania}
+% \textbf{Vertical Pod Autoscaler (VPA)} jest mechanizmem Kubernetesa, który automatycznie dostosowuje żądania (requests) i limity (limits) zasobów CPU i pamięci dla pojedynczych Podów. Jego podstawowa zasada działania opiera się na ciągłym monitorowaniu rzeczywistego zużycia zasobów przez kontenery w Podzie. Na podstawie historycznych danych o wykorzystaniu, VPA rekomenduje lub automatycznie aplikuje optymalne wartości dla żądań i limitów zasobów, dążąc do minimalizacji marnotrawstwa zasobów przy jednoczesnym zapewnieniu stabilnej pracy aplikacji. VPA składa się z trzech głównych komponentów: \textbf{Recommender}, który analizuje metryki zużycia zasobów i proponuje optymalne wartości; \textbf{Updater}, który faktycznie modyfikuje specyfikację Podów lub, w trybie automatycznym, reinicjuje Pody z nowymi ustawieniami zasobów; oraz \textbf{Admission Controller}, który przechwytuje żądania tworzenia Podów i nadpisuje ich zasoby zgodnie z rekomendacjami VPA.
+% 
+% Mimo swoich zalet, VPA posiada pewne ograniczenia. Jednym z głównych jest fakt, że automatyczne zastosowanie zmian zasobów zazwyczaj wymaga zrestartowania Poda, co może prowadzić do krótkotrwałych przerw w dostępności usługi. Ponadto, VPA najlepiej sprawdza się w przypadku aplikacji o stosunkowo przewidywalnym wzorcu zużycia zasobów, natomiast w aplikacjach o bardzo dynamicznych i nieregularnych skokach obciążenia może nie reagować wystarczająco szybko. Co więcej, VPA domyślnie rekomenduje wartości dla wszystkich kontenerów w Podzie, co może być nieoptymalne dla Podów z wieloma kontenerami o zróżnicowanych profilach zużycia. Zastosowania VPA obejmują głównie aplikacje, dla których kluczowa jest optymalizacja kosztów i wykorzystania pojedynczych instancji, takie jak bazy danych, systemy cache czy aplikacje monolityczne o stabilnym profilu obciążenia, gdzie precyzyjne dopasowanie zasobów jest ważniejsze niż natychmiastowa reakcja na nagłe piki.
+% 
+% \subsubsection{Horizontal Pod Autoscaler (HPA): zasada działania, metryki, skalowanie oparte na obciążeniu}
+% \textbf{Horizontal Pod Autoscaler (HPA)} to mechanizm Kubernetesa odpowiedzialny za automatyczne skalowanie liczby replik Podów w zależności od obserwowanego obciążenia. Jego główna zasada działania polega na monitorowaniu wybranych metryk (najczęściej zużycia CPU i pamięci, ale także metryk niestandardowych lub zewnętrznych) i porównywaniu ich z zdefiniowanymi progami. Jeśli wartość metryki przekroczy określony próg, HPA zwiększa liczbę replik Podów; jeśli spadnie poniżej progu, zmniejsza ich liczbę, dążąc do utrzymania średniego zużycia zasobów na poziomie zbliżonym do wartości docelowej. HPA działa jako kontroler w płaszczyźnie sterowania Kubernetesa, regularnie sprawdzając metryki z Metrics API (lub innych źródeł) i aktualizując pole `replicas` w obiektach takich jak Deployment, ReplicaSet czy StatefulSet.
+% 
+% Kluczową zaletą HPA jest możliwość skalowania opartego na obciążeniu, co pozwala na efektywne zarządzanie dostępnością i wydajnością aplikacji w zmiennym środowisku. Metryki używane przez HPA mogą pochodzić z różnych źródeł:
+% \begin{itemize}
+%     \item \textbf{Metryki zasobów (Resource Metrics):} najczęściej używane są metryki dotyczące zużycia CPU (wyrażone jako procent żądanej wartości CPU) oraz pamięci. Są one dostarczane przez Metrics Server, który zbiera dane z kubeletów.
+%     \item \textbf{Metryki niestandardowe (Custom Metrics):} umożliwiają skalowanie w oparciu o metryki specyficzne dla aplikacji (np. liczba żądań na sekundę, długość kolejki wiadomości), dostarczane przez adaptery Custom Metrics API.
+%     \item \textbf{Metryki zewnętrzne (External Metrics):} pozwalają na skalowanie w oparciu o metryki pochodzące spoza klastra Kubernetes (np. długość kolejki w systemie messagingowym takim jak Kafka czy RabbitMQ), dostarczane przez adaptery External Metrics API.
+% \end{itemize}
+% HPA jest szczególnie efektywny dla aplikacji typu stateless, które mogą łatwo być skalowane horyzontalnie poprzez dodawanie lub usuwanie replik. Jego ograniczenia wynikają z opóźnień w reakcji na gwałtowne zmiany obciążenia (ze względu na konieczność uruchomienia nowych Podów) oraz z potrzeby precyzyjnego ustawienia progów metryk, co może być wyzwaniem w przypadku nieprzewidywalnych wzorców ruchu. Mimo to, HPA jest podstawowym narzędziem do utrzymania wysokiej dostępności i reagowania na piki obciążenia w większości wdrożeń Kubernetesa.
+% 
+% \subsubsection{Kubernetes Event-driven Autoscaling (KEDA): integracja z brokerami zdarzeń, scenariusze użycia}
+% \textbf{Kubernetes Event-driven Autoscaling (KEDA)} to elastyczne i rozszerzalne rozwiązanie typu open-source, które uzupełnia i rozszerza funkcjonalności Horizontal Pod Autoscaler (HPA), umożliwiając skalowanie aplikacji w Kubernetesie w oparciu o liczbę zdarzeń w kolejkach, strumieniach czy innych systemach zewnętrznych. KEDA działa jako operator Kubernetesa, który dynamicznie tworzy obiekty HPA na podstawie zdefiniowanych \textbf{Scalerów}, a następnie usuwa je, gdy nie są już potrzebne. To pozwala na zero-skalowanie, czyli redukcję liczby replik do zera, gdy nie ma żadnych zdarzeń do przetworzenia, co znacząco optymalizuje koszty.
+% 
+% Kluczową cechą KEDA jest jego głęboka integracja z brokerami zdarzeń i zewnętrznymi systemami. KEDA oferuje szeroką gamę wbudowanych Scalerów dla popularnych technologii, takich jak Apache Kafka, RabbitMQ, Azure Service Bus, AWS SQS, Redis, Prometheus czy baza danych PostgreSQL. Dzięki temu aplikacje, które przetwarzają zdarzenia asynchronicznie, mogą być skalowane w sposób precyzyjny i efektywny, reagując bezpośrednio na bieżące zapotrzebowanie.
+% 
+% Typowe scenariusze użycia KEDA obejmują:
+% \begin{itemize}
+%     \item \textbf{Aplikacje oparte na kolejkach wiadomości:} skalowanie workerów konsumujących wiadomości z kolejek, gdzie liczba replik jest wprost proporcjonalna do liczby oczekujących wiadomości.
+%     \item \textbf{Funkcje serverless (Function-as-a-Service):} umożliwienie uruchamiania funkcji tylko wtedy, gdy pojawią się zdarzenia, minimalizując zużycie zasobów w czasie bezczynności.
+%     \item \textbf{Przetwarzanie strumieni danych:} adaptacyjne skalowanie aplikacji przetwarzających strumienie danych w czasie rzeczywistym, reagując na zmieniającą się przepustowość strumienia.
+%     \item \textbf{Integracja z bazami danych i systemami pamięci podręcznej:} skalowanie w oparciu o liczbę zapytań lub obciążenie tych systemów.
+% \end{itemize}
+% KEDA jest szczególnie cenne w architekturach event-driven, gdzie HPA oparte na CPU lub pamięci byłoby niewystarczające. Jego elastyczność i możliwość łatwego dodawania nowych Scalerów sprawiają, że jest to potężne narzędzie do budowania wysoce adaptacyjnych i ekonomicznych systemów w Kubernetesie.
 
-\subsubsection{Vertical Pod Autoscaler (VPA): zasada działania, ograniczenia, zastosowania}
-\textbf{Vertical Pod Autoscaler (VPA)} jest mechanizmem Kubernetesa, który automatycznie dostosowuje żądania (requests) i limity (limits) zasobów CPU i pamięci dla pojedynczych Podów. Jego podstawowa zasada działania opiera się na ciągłym monitorowaniu rzeczywistego zużycia zasobów przez kontenery w Podzie. Na podstawie historycznych danych o wykorzystaniu, VPA rekomenduje lub automatycznie aplikuje optymalne wartości dla żądań i limitów zasobów, dążąc do minimalizacji marnotrawstwa zasobów przy jednoczesnym zapewnieniu stabilnej pracy aplikacji. VPA składa się z trzech głównych komponentów: \textbf{Recommender}, który analizuje metryki zużycia zasobów i proponuje optymalne wartości; \textbf{Updater}, który faktycznie modyfikuje specyfikację Podów lub, w trybie automatycznym, reinicjuje Pody z nowymi ustawieniami zasobów; oraz \textbf{Admission Controller}, który przechwytuje żądania tworzenia Podów i nadpisuje ich zasoby zgodnie z rekomendacjami VPA.
 
-Mimo swoich zalet, VPA posiada pewne ograniczenia. Jednym z głównych jest fakt, że automatyczne zastosowanie zmian zasobów zazwyczaj wymaga zrestartowania Poda, co może prowadzić do krótkotrwałych przerw w dostępności usługi. Ponadto, VPA najlepiej sprawdza się w przypadku aplikacji o stosunkowo przewidywalnym wzorcu zużycia zasobów, natomiast w aplikacjach o bardzo dynamicznych i nieregularnych skokach obciążenia może nie reagować wystarczająco szybko. Co więcej, VPA domyślnie rekomenduje wartości dla wszystkich kontenerów w Podzie, co może być nieoptymalne dla Podów z wieloma kontenerami o zróżnicowanych profilach zużycia. Zastosowania VPA obejmują głównie aplikacje, dla których kluczowa jest optymalizacja kosztów i wykorzystania pojedynczych instancji, takie jak bazy danych, systemy cache czy aplikacje monolityczne o stabilnym profilu obciążenia, gdzie precyzyjne dopasowanie zasobów jest ważniejsze niż natychmiastowa reakcja na nagłe piki.
 
-\subsubsection{Horizontal Pod Autoscaler (HPA): zasada działania, metryki, skalowanie oparte na obciążeniu}
-\textbf{Horizontal Pod Autoscaler (HPA)} to mechanizm Kubernetesa odpowiedzialny za automatyczne skalowanie liczby replik Podów w zależności od obserwowanego obciążenia. Jego główna zasada działania polega na monitorowaniu wybranych metryk (najczęściej zużycia CPU i pamięci, ale także metryk niestandardowych lub zewnętrznych) i porównywaniu ich z zdefiniowanymi progami. Jeśli wartość metryki przekroczy określony próg, HPA zwiększa liczbę replik Podów; jeśli spadnie poniżej progu, zmniejsza ich liczbę, dążąc do utrzymania średniego zużycia zasobów na poziomie zbliżonym do wartości docelowej. HPA działa jako kontroler w płaszczyźnie sterowania Kubernetesa, regularnie sprawdzając metryki z Metrics API (lub innych źródeł) i aktualizując pole `replicas` w obiektach takich jak Deployment, ReplicaSet czy StatefulSet.
 
-Kluczową zaletą HPA jest możliwość skalowania opartego na obciążeniu, co pozwala na efektywne zarządzanie dostępnością i wydajnością aplikacji w zmiennym środowisku. Metryki używane przez HPA mogą pochodzić z różnych źródeł:
+\subsection{Przegląd istniejących mechanizmów skalowania i zarządzania}
+
+Efektywne zarządzanie zasobami w środowisku Kubernetes opiera się na zestawie natywnych oraz zewnętrznych kontrolerów, które realizują paradygmat autonomicznego sterowania. Mechanizmy te można podzielić według osi skalowania (wertykalna vs horyzontalna) oraz źródła sygnału sterującego (metryki zasobowe vs zdarzenia). Poniższe podsekcje zawierają szczegółową analizę architektury oraz algorytmów decyzyjnych trzech kluczowych rozwiązań: \gls{vpa}, \gls{hpa} oraz \gls{keda}.
+
+\subsubsection{Vertical Pod Autoscaler (VPA)}
+
+\textbf{Vertical Pod Autoscaler (VPA)} to mechanizm realizujący skalowanie pionowe, którego celem jest automatyczne dopasowanie wielkości rezerwacji (requests) i limitów (limits) zasobów CPU oraz pamięci do rzeczywistego profilu zużycia aplikacji. Działa on w oparciu o analizę historycznych danych metrycznych, dążąc do minimalizacji zjawiska \textit{slack} (niewykorzystanych, a zarezerwowanych zasobów) oraz uniknięcia dławienia wydajności (throttling) i błędów OOM (Out Of Memory) \cite{kubernetes_vpa}.
+
+Architektura VPA składa się z trzech współpracujących ze sobą komponentów:
+\begin{enumerate}
+    \item \textbf{Recommender}: Analizuje historię zużycia zasobów pobieraną z serwera metryk (najczęściej Prometheus lub Metrics Server). Wykorzystuje algorytm oparty na histogramie z zanikiem wykładniczym (decaying histogram), aby wyznaczyć rekomendowane wartości z odpowiednim marginesem bezpieczeństwa.
+    \item \textbf{Updater}: Monitoruje pody i decyduje, czy ich obecna konfiguracja odbiega od rekomendacji w stopniu uzasadniającym restart. Jeśli tak, poddaje pody eksmisji (zgodnie z polityką \textit{Pod Disruption Budget}).
+    \item \textbf{Admission Controller}: Komponent typu \textit{Mutating Webhook}, który przechwytuje żądania utworzenia nowych podów (np. po restarcie wymuszonym przez Updater) i wstrzykuje do ich specyfikacji zaktualizowane wartości zasobów.
+\end{enumerate}
+
+Ograniczeniem VPA jest jego inwazyjność – zmiana zasobów w obecnej implementacji Kubernetesa (przed wersją 1.27 i wprowadzeniem mechanizmu \textit{In-place Update}) wymaga restartu kontenera. Sprawia to, że VPA jest dedykowany głównie dla usług o stabilnym wzorcu wzrostu obciążenia (np. bazy danych) lub środowisk deweloperskich, a rzadziej dla aplikacji wymagających wysokiej dostępności i obsługi nagłych skoków ruchu (ang. \textit{traffic spikes}).
+
+\begin{figure}[h]
+    \centering
+    % Resizebox skaluje zawartość do szerokości tekstu (textwidth)
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=2.5cm, auto, >=stealth]
+        % Nodes
+        \node [block] (metrics) {Metrics Server / Prometheus};
+        \node [block, right=4cm of metrics] (recommender) {VPA Recommender};
+        \node [decision, right=2cm of recommender] (check) {Czy zmiana $>$ próg?};
+        
+        % Drugi rząd
+        \node [block, below=2.5cm of check] (updater) {VPA Updater (Eviction)};
+        \node [block, left=2cm of updater] (api) {Kubernetes API};
+        \node [block, left=2cm of api] (controller) {Admission Controller};
+        
+        % Trzeci rząd
+        \node [cloud, below=1.5cm of controller] (pod) {Nowy Pod (Zaktualizowany)};
+
+        % Paths
+        \path [line] (metrics) -- node[above, font=\footnotesize, pos=0.5] {Dane historyczne} (recommender);
+        \path [line] (recommender) -- node[above, font=\footnotesize, pos=0.5] {Rekomendacja} (check);
+        \path [line] (check) -- node[right, font=\footnotesize] {Tak} (updater);
+        \path [line] (updater) -- node[above, font=\footnotesize] {Restart} (api);
+        \path [line] (api) -- node[above, font=\footnotesize] {Create Pod} (controller);
+        \path [line] (controller) -- node[right, font=\footnotesize] {Mutacja} (pod);
+        
+        % Ścieżka powrotna
+        \draw [line] (pod.west) -- ++(-2cm,0) |- node [pos=0.25, above, rotate=90, font=\footnotesize] {Metryki zużycia} (metrics.west);
+    \end{tikzpicture}%
+    } % Koniec resizebox
+    \caption{Schemat działania pętli sterowania Vertical Pod Autoscaler.}
+    \label{fig:vpa-loop}
+\end{figure}
+
+
+\subsubsection{Horizontal Pod Autoscaler (HPA)}
+
+\textbf{Horizontal Pod Autoscaler (HPA)} to standardowy mechanizm skalowania poziomego, który dynamicznie dostosowuje liczbę replik w obiektach \gls{deployment} lub \textit{StatefulSet}. HPA implementuje klasyczną pętlę sprzężenia zwrotnego (feedback loop), działającą domyślnie z częstotliwością 15 sekund \cite{kubernetes_hpa}.
+
+Algorytm sterujący HPA opiera się na modelu proporcjonalnym. Liczba pożądanych replik jest obliczana według wzoru:
+
+\begin{equation}
+    N_{target} = \left\lceil N_{current} \times \frac{M_{current}}{M_{target}} \right\rceil
+\end{equation}
+
+gdzie:
 \begin{itemize}
-    \item \textbf{Metryki zasobów (Resource Metrics):} najczęściej używane są metryki dotyczące zużycia CPU (wyrażone jako procent żądanej wartości CPU) oraz pamięci. Są one dostarczane przez Metrics Server, który zbiera dane z kubeletów.
-    \item \textbf{Metryki niestandardowe (Custom Metrics):} umożliwiają skalowanie w oparciu o metryki specyficzne dla aplikacji (np. liczba żądań na sekundę, długość kolejki wiadomości), dostarczane przez adaptery Custom Metrics API.
-    \item \textbf{Metryki zewnętrzne (External Metrics):} pozwalają na skalowanie w oparciu o metryki pochodzące spoza klastra Kubernetes (np. długość kolejki w systemie messagingowym takim jak Kafka czy RabbitMQ), dostarczane przez adaptery External Metrics API.
+    \item $N_{target}$ – docelowa liczba replik,
+    \item $N_{current}$ – obecna liczba replik,
+    \item $M_{current}$ – bieżąca wartość metryki (np. średnie zużycie CPU),
+    \item $M_{target}$ – wartość zadana (setpoint) zdefiniowana przez użytkownika.
 \end{itemize}
-HPA jest szczególnie efektywny dla aplikacji typu stateless, które mogą łatwo być skalowane horyzontalnie poprzez dodawanie lub usuwanie replik. Jego ograniczenia wynikają z opóźnień w reakcji na gwałtowne zmiany obciążenia (ze względu na konieczność uruchomienia nowych Podów) oraz z potrzeby precyzyjnego ustawienia progów metryk, co może być wyzwaniem w przypadku nieprzewidywalnych wzorców ruchu. Mimo to, HPA jest podstawowym narzędziem do utrzymania wysokiej dostępności i reagowania na piki obciążenia w większości wdrożeń Kubernetesa.
 
-\subsubsection{Kubernetes Event-driven Autoscaling (KEDA): integracja z brokerami zdarzeń, scenariusze użycia}
-\textbf{Kubernetes Event-driven Autoscaling (KEDA)} to elastyczne i rozszerzalne rozwiązanie typu open-source, które uzupełnia i rozszerza funkcjonalności Horizontal Pod Autoscaler (HPA), umożliwiając skalowanie aplikacji w Kubernetesie w oparciu o liczbę zdarzeń w kolejkach, strumieniach czy innych systemach zewnętrznych. KEDA działa jako operator Kubernetesa, który dynamicznie tworzy obiekty HPA na podstawie zdefiniowanych \textbf{Scalerów}, a następnie usuwa je, gdy nie są już potrzebne. To pozwala na zero-skalowanie, czyli redukcję liczby replik do zera, gdy nie ma żadnych zdarzeń do przetworzenia, co znacząco optymalizuje koszty.
-
-Kluczową cechą KEDA jest jego głęboka integracja z brokerami zdarzeń i zewnętrznymi systemami. KEDA oferuje szeroką gamę wbudowanych Scalerów dla popularnych technologii, takich jak Apache Kafka, RabbitMQ, Azure Service Bus, AWS SQS, Redis, Prometheus czy baza danych PostgreSQL. Dzięki temu aplikacje, które przetwarzają zdarzenia asynchronicznie, mogą być skalowane w sposób precyzyjny i efektywny, reagując bezpośrednio na bieżące zapotrzebowanie.
-
-Typowe scenariusze użycia KEDA obejmują:
+HPA pobiera metryki z trzech głównych źródeł:
 \begin{itemize}
-    \item \textbf{Aplikacje oparte na kolejkach wiadomości:} skalowanie workerów konsumujących wiadomości z kolejek, gdzie liczba replik jest wprost proporcjonalna do liczby oczekujących wiadomości.
-    \item \textbf{Funkcje serverless (Function-as-a-Service):} umożliwienie uruchamiania funkcji tylko wtedy, gdy pojawią się zdarzenia, minimalizując zużycie zasobów w czasie bezczynności.
-    \item \textbf{Przetwarzanie strumieni danych:} adaptacyjne skalowanie aplikacji przetwarzających strumienie danych w czasie rzeczywistym, reagując na zmieniającą się przepustowość strumienia.
-    \item \textbf{Integracja z bazami danych i systemami pamięci podręcznej:} skalowanie w oparciu o liczbę zapytań lub obciążenie tych systemów.
-\end{itemize}
-KEDA jest szczególnie cenne w architekturach event-driven, gdzie HPA oparte na CPU lub pamięci byłoby niewystarczające. Jego elastyczność i możliwość łatwego dodawania nowych Scalerów sprawiają, że jest to potężne narzędzie do budowania wysoce adaptacyjnych i ekonomicznych systemów w Kubernetesie.
-
-\subsection{Model MAPE-K w Systemach Samozarządzających}
-W obliczu rosnącej złożoności i dynamiki współczesnych systemów informatycznych, zwłaszcza tych rozproszonych i opartych na chmurze, tradycyjne podejścia do zarządzania stają się niewystarczające. Konieczność minimalizacji interwencji ludzkiej, zwiększenia odporności na awarie oraz optymalizacji wydajności i kosztów doprowadziła do rozwoju koncepcji systemów samozarządzających. Kluczowym paradygmatem w tym obszarze jest model MAPE-K, stanowiący ramy dla projektowania i implementacji autonomicznych mechanizmów kontrolnych. Model ten dostarcza ustrukturyzowane podejście do budowania systemów zdolnych do samokonfiguracji, samooptymalizacji, samonaprawy i samoochrony, w dużej mierze eliminując potrzebę ciągłego nadzoru człowieka.
-
-\subsubsection{Monitor, Analyze, Plan, Execute, Knowledge}
-Model MAPE-K składa się z czterech głównych komponentów funkcjonalnych tworzących pętlę sprzężenia zwrotnego, wspieraną przez wspólną bazę wiedzy. Każdy z tych elementów odgrywa kluczową rolę w procesie autonomicznego zarządzania:
-
-\begin{itemize}
-    \item \textbf{Monitor (Monitoruj):} Ten komponent jest odpowiedzialny za zbieranie danych o systemie i jego środowisku. Obejmuje to gromadzenie metryk wydajności (np. zużycie CPU, pamięci, opóźnienia, przepustowość), informacji o stanie komponentów, logów błędów oraz wszelkich innych danych kontekstowych, które są istotne dla podejmowania decyzji. Skuteczne monitorowanie wymaga odpowiedniej instrumentacji systemu i zdolności do agregacji danych z wielu źródeł w czasie rzeczywistym.
-    \item \textbf{Analyze (Analizuj):} Moduł analizy przetwarza zebrane dane, identyfikując wzorce, trendy oraz anomalie. Jego zadaniem jest diagnozowanie problemów, przewidywanie przyszłych stanów systemu oraz ocenianie, czy obecny stan odpowiada pożądanym celom. Analiza może obejmować zastosowanie statystyk, algorytmów uczenia maszynowego do wykrywania korelacji, predykcji obciążenia czy identyfikacji pierwotnych przyczyn problemów. W tym etapie system rozumie "co się dzieje i dlaczego".
-    \item \textbf{Plan (Planuj):} Na podstawie wyników analizy, komponent planowania generuje sekwencję akcji, które mają na celu dostosowanie systemu do pożądanego stanu lub rozwiązanie zdiagnozowanego problemu. Planowanie obejmuje wybór strategii adaptacji, optymalizację zasobów, definiowanie zmian konfiguracji lub modyfikację polityk. Ten etap odpowiada na pytanie "co należy zrobić".
-    \item \textbf{Execute (Wykonaj):} Moduł wykonawczy jest odpowiedzialny za implementację planu. Przekształca on abstrakcyjne akcje zdefiniowane w fazie planowania na konkretne operacje w systemie, takie jak skalowanie instancji, zmiana konfiguracji, restartowanie komponentów czy relokacja obciążenia. Wykonanie musi być odporne na błędy i zapewniać spójność systemu.
-    \item \textbf{Knowledge (Wiedza):} Komponent wiedzy stanowi centralne repozytorium informacji, które jest współdzielone przez wszystkie pozostałe moduły. Zawiera on cele systemu (np. polityki QoS, SLA), modele środowiska i aplikacji, historyczne dane o zachowaniu systemu, a także zasady i algorytmy wykorzystywane w analizie i planowaniu. Baza wiedzy jest dynamiczna i może być aktualizowana na podstawie doświadczeń zebranych podczas działania pętli.
+    \item \textbf{Resource Metrics API}: Standardowe metryki CPU i RAM (dostarczane przez \textit{metrics-server}).
+    \item \textbf{Custom Metrics API}: Metryki aplikacji, np. liczba zapytań HTTP na sekundę (RPS), eksponowane np. przez system Prometheus.
+    \item \textbf{External Metrics API}: Metryki spoza klastra, np. długość kolejki w chmurze AWS SQS.
 \end{itemize}
 
-\subsubsection{Aplikacja modelu MAPE-K w zarządzaniu usługami}
-Model MAPE-K jest powszechnie stosowany jako architektura referencyjna dla systemów samozarządzających w różnorodnych domenach, w tym w zarządzaniu usługami w chmurze obliczeniowej. Jego modularność i jasno zdefiniowane funkcje sprawiają, że idealnie nadaje się do projektowania autonomicznych kontrolerów, które mogą dynamicznie adaptować usługi do zmieniających się warunków.
+Aby zapobiec oscylacjom (zjawisku \textit{flapping}), HPA wykorzystuje mechanizmy stabilizacji (okno czasowe \textit{stabilizationWindowSeconds}), które opóźniają operację skalowania w dół (scale-down), pozwalając systemowi na upewnienie się, że spadek obciążenia jest trwały.
 
-W kontekście zarządzania usługami, aplikacja modelu MAPE-K może przybrać następujące formy:
-\begin{itemize}
-    \item \textbf{Monitorowanie Usług:} obejmuje zbieranie metryk dotyczących dostępności, wydajności (np. czasy odpowiedzi, przepustowość), zużycia zasobów (CPU, pamięć, sieć, dysk) przez poszczególne usługi i ich komponenty. Monitorowane są również metryki biznesowe i zdarzenia pochodzące z zewnętrznych systemów.
-    \item \textbf{Analiza Zachowania Usług:} polega na analizie zebranych danych w celu wykrycia anomalii, przewidywania przyszłego obciążenia, identyfikacji wąskich gardeł lub określenia, czy usługi spełniają zdefiniowane poziomy SLA (Service Level Agreement). Analiza może obejmować agregację danych, tworzenie prognoz czy uruchamianie algorytmów detekcji wzorców.
-    \item \textbf{Planowanie Adaptacji Usług:} na podstawie wyników analizy, komponent planowania podejmuje decyzje o koniecznych zmianach. Może to być decyzja o skalowaniu horyzontalnym (dodanie/usunięcie instancji), skalowaniu wertykalnym (zmiana zasobów Podu), relokacji usług, optymalizacji konfiguracji czy wdrożeniu poprawek. Plan jest optymalizowany pod kątem wielu kryteriów, takich jak koszt, wydajność i odporność.
-    \item \textbf{Wykonanie Akcji Adaptacyjnych:} moduł wykonawczy realizuje zaplanowane zmiany poprzez interakcję z platformą orkiestracji (np. API Kubernetesa). Obejmuje to uruchamianie/zatrzymywanie Podów, modyfikowanie konfiguracji, aktualizowanie reguł sieciowych czy dostosowywanie parametrów bazy danych. Ważne jest, aby wykonanie było atomowe i bezpieczne, aby nie wprowadzać niestabilności.
-    \item \textbf{Baza Wiedzy dla Usług:} Przechowuje informacje o politykach zarządzania usługami, topologii sieci, zależnościach między mikroserwisami, historycznych profilach obciążenia, predefiniowanych strategiach skalowania, a także modelach predykcyjnych. Wiedza ta jest wykorzystywana na każdym etapie pętli, ewoluując wraz z doświadczeniem systemu.
-\end{itemize}
-Model MAPE-K zapewnia elastyczne ramy do budowania autonomicznych systemów zarządzania usługami, które są w stanie efektywnie reagować na dynamiczne warunki operacyjne, optymalizować wykorzystanie zasobów i zapewniać wysoką jakość usług bez ciągłej interwencji człowieka. Jego zastosowanie jest szczególnie wartościowe w złożonych i szybko zmieniających się środowiskach chmurowych, gdzie manualne zarządzanie jest nierealne.
+\begin{figure}[h]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=3.5cm, auto, >=stealth]
+        % Nodes
+        \node[block] (hpa) {HPA Controller};
+        \node[block, right=4cm of hpa] (api) {Scale API (Deployment)};
+        \node[block, below=2.5cm of api] (pods) {Pody (Replicas)};
+        \node[block, left=4cm of pods] (metrics) {Metrics Server};
+
+        % Edges
+        \path[line] (hpa) -- node[above, font=\footnotesize] {Oblicz $N_{target}$} (api);
+        \path[line] (api) -- node[right, font=\footnotesize] {Skaluj} (pods);
+        \path[line] (pods) -- node[below, font=\footnotesize] {Użycie zasobów} (metrics);
+        \path[line] (metrics) -- node[left, font=\footnotesize] {Pobierz metryki} (hpa);
+        
+        % POPRAWKA: Napis "Pętla..." umieszczony idealnie w środku geometrycznym diagramu
+        % (pomiędzy HPA a Podami), zamiast na sztywnych współrzędnych.
+        \node[text width=4cm, align=center, font=\itshape] at ($(hpa.south east)!0.5!(pods.north west)$) {Pętla sprzężenia zwrotnego};
+    \end{tikzpicture}%
+    }
+    \caption{Pętla sterowania Horizontal Pod Autoscaler.}
+    \label{fig:hpa-loop}
+\end{figure}
+
+\subsubsection{Kubernetes Event-driven Autoscaling (KEDA)}
+
+\textbf{KEDA} (Kubernetes Event-driven Autoscaling) to projekt inkubowany przez CNCF, który rozwiązuje problem skalowania aplikacji w oparciu o zdarzenia (event-driven), a nie tylko obciążenie zasobów. Jest to szczególnie istotne w architekturach przetwarzania asynchronicznego (np. systemy kolejkowe), gdzie zużycie CPU może nie korelować bezpośrednio z liczbą zadań do wykonania \cite{keda_docs}.
+
+KEDA wprowadza pojęcie \textbf{ScaledObject} – zasobu CRD (\gls{crd}), który definiuje mapowanie między źródłem zdarzeń a obiektem skalowanym. Architektura KEDA składa się z dwóch kluczowych elementów:
+\begin{enumerate}
+    \item \textbf{KEDA Operator / Controller}: Odpowiada za aktywację i dezaktywację skalowania. Kluczową funkcjonalnością jest skalowanie „od zera do jednego” (0 $\to$ 1). Gdy w źródle nie ma zdarzeń, KEDA redukuje liczbę replik do zera (czego standardowe HPA nie potrafi). Gdy pojawi się zdarzenie, KEDA przywraca jedną replikę.
+    \item \textbf{Metrics Adapter}: Wystawia metryki ze źródeł zewnętrznych (np. Kafka, RabbitMQ, PostgreSQL) do interfejsu \textit{External Metrics API}. Gdy liczba replik wynosi co najmniej 1, kontrolę nad dalszym skalowaniem (1 $\to$ N) przejmuje standardowy HPA, korzystając z metryk dostarczonych przez adapter KEDA.
+\end{enumerate}
+
+Dzięki takiemu podejściu, KEDA łączy zalety architektury sterowanej zdarzeniami z natywną stabilnością HPA, umożliwiając budowę wysoce elastycznych i kosztowo efektywnych systemów rozproszonych.
+
+\begin{figure}[h]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=3cm, auto, >=stealth]
+        % Nodes
+        \node[block, fill=green!10] (source) {Źródło Zdarzeń (np. Kafka)};
+        \node[block, right=2.5cm of source] (keda) {KEDA Operator};
+        \node[block, right=2.5cm of keda] (hpa) {Standardowy HPA};
+        \node[block, below=3cm of hpa] (pods) {Deployment (1..N)};
+        \node[decision, below=2cm of keda] (zero) {0 replik?};
+
+        % Edges
+        \path[line] (source) -- node[above, font=\footnotesize] {Monitoring} (keda);
+        \path[line] (keda) -- node[above, font=\footnotesize] {Obiekt HPA} (hpa);
+        \path[line] (keda) -- node[below, font=\footnotesize] {Metryki} (hpa);
+        \path[line] (hpa) -- node[right, font=\footnotesize] {Skalowanie (1 $\to$ N)} (pods);
+        
+        % Logic 0-1
+        \path[line] (keda) -- (zero);
+        \path[line] (zero) -- node [right, font=\footnotesize, pos=0.4] {Brak zdarzeń} (pods);
+        
+        % Linia przerywana
+        \draw[line, dashed] (source) |- ++(0,-5cm) -| node [pos=0.25, above, font=\footnotesize] {Aktywacja (0 $\to$ 1)} (pods);
+
+    \end{tikzpicture}%
+    }
+    \caption{Model współpracy KEDA z HPA: Skalowanie 0-1 realizowane przez Operator, 1-N przez HPA.}
+    \label{fig:keda-arch}
+\end{figure}
 
 
+\begin{table}[htbp]
+    \centering
+    \caption{Porównanie mechanizmów automatycznego skalowania w Kubernetesie.}
+    \label{tab:scaling-comparison}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|p{3.5cm}|p{4cm}|p{4cm}|p{4cm}|}
+        \hline
+        \textbf{Cecha} & \textbf{VPA (Vertical)} & \textbf{HPA (Horizontal)} & \textbf{KEDA (Event-driven)} \\ \hline
+        
+        \textbf{Kierunek skalowania} & 
+        Pionowy (zwiększanie zasobów CPU/RAM dla istniejącego Poda) & 
+        Poziomy (zwiększanie liczby replik Podów) & 
+        Poziomy (sterowanie liczbą replik, w tym skalowanie do zera) \\ \hline
+        
+        \textbf{Podstawa decyzji} & 
+        Analiza historycznych trendów zużycia zasobów & 
+        Bieżące zużycie zasobów w odniesieniu do wartości zadanej (target) & 
+        Liczba zdarzeń w systemie zewnętrznym (np. długość kolejki Kafka) \\ \hline
+        
+        \textbf{Reakcja na zmianę} & 
+        Inwazyjna (zazwyczaj wymaga restartu Poda) & 
+        Płynna (dodawanie nowych instancji), wymaga czasu na start & 
+        Natychmiastowa reakcja na zdarzenie (aktywacja 0 $\to$ 1) \\ \hline
+        
+        \textbf{Główne zastosowanie} & 
+        Aplikacje typu \textit{stateful}, bazy danych, systemy legacy (monolity) & 
+        Bezstanowe mikroserwisy, aplikacje webowe obsługujące ruch HTTP & 
+        Przetwarzanie tła, systemy kolejkowe, funkcje FaaS, IoT \\ \hline
+        
+        \textbf{Główne ograniczenie} & 
+        Nie radzi sobie z nagłymi skokami ruchu (tzw. \textit{traffic spikes}) & 
+        Opóźnienie wynikające z pętli sprzężenia i czasu uruchamiania kontenera & 
+        Wymaga zewnętrznego źródła metryk i adaptera (metrics-adapter) \\ \hline
+        
+    \end{tabular}%
+    }
+\end{table}

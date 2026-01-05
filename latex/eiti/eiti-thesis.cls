@@ -51,6 +51,46 @@
 \RequirePackage{fancyhdr}   % Custom header/footer styles
 \RequirePackage{fourier}    % Adobe Utopia font
 \RequirePackage{graphicx}   % Enhanced images support
+\RequirePackage{tikz}       % Pakiet do rysowania diagramów
+\usetikzlibrary{shapes, arrows, positioning, fit, backgrounds, shadows, calc}
+% Globalne style dla diagramów (naprawia błąd "I do not know the key")
+\tikzset{
+    % Podstawowy blok (prostokąt)
+    block/.style = {
+        rectangle, 
+        draw, 
+        fill=blue!5, 
+        text width=3cm, 
+        text centered, 
+        rounded corners, 
+        minimum height=1.2cm,
+        drop shadow
+    },
+    % Linia łącząca (strzałka)
+    line/.style = {
+        draw, 
+        -latex, % grot strzałki
+        thick
+    },
+    % Blok decyzyjny (romb)
+    decision/.style = {
+        diamond, 
+        draw, 
+        fill=yellow!10, 
+        text width=2cm, 
+        text centered, 
+        inner sep=0pt,
+        drop shadow
+    },
+    % Chmura (np. internet/zewnętrzne źródło)
+    cloud/.style = {
+        draw, 
+        ellipse, 
+        fill=red!5, 
+        minimum height=2em,
+        drop shadow
+    }
+}
 \RequirePackage{ifluatex}   % LuaTeX-specific options
 \RequirePackage{ifpdf}      % pdfTeX-specific options
 \RequirePackage{ifxetex}    % XeTeX-specific options
@@ -60,6 +100,7 @@
 \RequirePackage{longtable}  % Multi-page tables
 \RequirePackage{multirow}   % Advanced table cells
 \RequirePackage{setspace}   % Set space between lines
+\RequirePackage{float}
 \RequirePackage{scrextend}  % Allows \addmargin environment
 \RequirePackage{tocloft}    % Custom ToC/LoF/LoT
 \RequirePackage{url}        % URL-sensitive line breaks

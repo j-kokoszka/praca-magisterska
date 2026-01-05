@@ -77,3 +77,9 @@ spec:
 
             - name: ERROR_THRESHOLD_HIGH
               value: "20"
+
+            - name: DEAFULT_THRESHOLD
+              value: "40"
+
+            - name: PANIC_THRESHOLD
+              value: "20"
