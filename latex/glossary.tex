@@ -13,6 +13,86 @@
 }
 
 
+\newglossaryentry{controlplane}{
+    name={Control Plane},
+    description={Warstwa sterująca klastra Kubernetes, odpowiedzialna za zarządzanie stanem klastra, planowanie zadań i wykrywanie oraz reagowanie na zdarzenia w klastrze}
+}
+
+\newglossaryentry{workernode}{
+    name={Worker Node},
+    description={Węzeł roboczy w klastrze Kubernetes; maszyna fizyczna lub wirtualna, na której uruchamiane są Pody z aplikacjami użytkownika}
+}
+
+\newglossaryentry{pod}{
+    name={Pod},
+    description={Najmniejsza i najprostsza jednostka w modelu obiektowym Kubernetesa, którą można utworzyć lub wdrożyć. Pod reprezentuje pojedynczą instancję działającego procesu w klastrze}
+}
+
+\newglossaryentry{deployment}{
+    name={Deployment},
+    description={Obiekt API Kubernetesa, który zarządza replikowanymi aplikacjami, umożliwiając deklaratywne aktualizacje Podów i ReplicaSetów}
+}
+
+\newglossaryentry{service}{
+    name={Service},
+    description={Abstrakcja definiująca logiczny zbiór Podów oraz politykę dostępu do nich (często nazywaną mikroserwisem)}
+}
+
+\newglossaryentry{operator}{
+    name={Operator},
+    description={Metoda pakowania, wdrażania i zarządzania aplikacją Kubernetes, wykorzystująca niestandardowe zasoby (CRD) do zautomatyzowania zadań administracyjnych}
+}
+
+\newglossaryentry{metricsserver}{
+    name={Metrics Server},
+    description={Komponent klastra Kubernetes zbierający metryki zużycia zasobów (CPU, RAM) z poszczególnych węzłów i udostępniający je poprzez Metrics API}
+}
+
+\newglossaryentry{admissioncontroller}{
+    name={Admission Controller},
+    description={Fragment kodu, który przechwytuje żądania do serwera API Kubernetes przed utrwaleniem obiektu, ale po uwierzytelnieniu i autoryzacji. Może walidować (Validating) lub modyfikować (Mutating) obiekty}
+}
+
+\newglossaryentry{scaler}{
+    name={Scaler},
+    description={W terminologii KEDA: komponent definiujący logikę połączenia z konkretnym źródłem zdarzeń (np. Kafka, Prometheus) i metodę pobierania z niego metryki decydującej o skalowaniu}
+}
+
+\newglossaryentry{scaledobject}{
+    name={ScaledObject},
+    description={Niestandardowy zasób (CRD) wprowadzany przez KEDA, służący do konfiguracji automatycznego skalowania dla konkretnego wdrożenia (Deployment) w oparciu o zdefiniowane triggery}
+}
+
+\newglossaryentry{autonomicmanager}{
+    name={Autonomic Manager},
+    description={Komponent oprogramowania, który implementuje pętlę sterowania (MAPE-K) w celu zarządzania zasobem lub systemem bez interwencji człowieka}
+}
+
+\newglossaryentry{managedelement}{
+    name={Managed Element},
+    description={Element systemu (sprzęt lub oprogramowanie), który jest kontrolowany przez menedżera autonomicznego. W Kubernetesie jest to zazwyczaj Pod, Deployment lub Node}
+}
+
+\newglossaryentry{sensors}{
+    name={Sensory},
+    description={Interfejsy umożliwiające menedżerowi pobieranie informacji o stanie elementu zarządzanego (np. eksportery metryk w Prometheusie)}
+}
+
+\newglossaryentry{effectors}{
+    name={Efektory},
+    description={Interfejsy umożliwiające menedżerowi wprowadzanie zmian w elemencie zarządzanym (np. API Kubernetesa pozwalające na zmianę konfiguracji)}
+}
+
+\newglossaryentry{autonomiccomputing}{
+    name={Autonomic Computing},
+    description={Paradygmat systemów komputerowych zdolnych do samodzielnego zarządzania (samokonfiguracji, samoleczenia, samooptymalizacji i samoobrony) przy minimalnej interwencji człowieka}
+}
+
+% (Opcjonalnie, jeśli używasz w innym miejscu)
+\newglossaryentry{feedbackloop}{
+    name={Pętla sprzężenia zwrotnego},
+    description={Mechanizm sterowania, w którym wyjście systemu jest mierzone i porównywane z wartością zadaną w celu wygenerowania sygnału sterującego minimalizującego błąd}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -25,11 +105,13 @@
 \newacronym{keda}{KEDA}{Kubernetes Event-driven Autoscaling}
 \newacronym{mapek}{MAPE-K}{Monitor, Analyze, Plan, Execute, Knowledge}
 \newacronym{crd}{CRD}{Custom Resource Definition}
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{rest}{REST}{Representational State Transfer}
 \newacronym{iac}{IaC}{Infrastructure as a Code}
 \newacronym{cni}{CNI}{Container Network Interface}
 \newacronym{cicd}{CI/CD}{Continuous Integration / Continuous Delivery}
-
 \newacronym{mape}{MAPE}{Monitor, Analyze, Plan and Execute}
 \newacronym{focale}{FOCALE}{Foundation - Observe - Compare - Act - Learn - rEason}
 \newacronym{ooda}{OODA}{Observe-Orient-Decide-Act}
 \newacronym{cladra}{CLADRA}{Closed Loop Anomaly Detection and Resolution Automation}
+

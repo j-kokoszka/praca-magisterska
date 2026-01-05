@@ -1,0 +1,55 @@
+main() {
+    [ $# -eq 0 ] && usage
+    while getopts ":dl" arg; do
+        case "$arg" in
+            d) #Deploy new version of shell-operator
+                deploy
+                ;;
+            l) #Print logs of shell-operator
+                logs
+                ;;
+            h) #Display help
+                usage
+                exit 0
+                ;;
+            :)
+              echo "Option -${OPTARG} requires an argument."
+              exit 1
+              ;;
+            ?)
+              echo "Invalid option: -${OPTARG}."
+              exit 1
+              ;;
+        esac
+    done
+}
+
+usage() { echo "$(basename $0) usage:" && grep -E " .) \#" $0 2>/dev/null; exit 0; }
+
+deploy() {
+  podman build -t registry.mgr.kokoszka.cloud/mgr/mgr-operator:2.0 .
+  podman push registry.mgr.kokoszka.cloud/mgr/mgr-operator:2.0
+  for m in `find manifests -type f`; do
+    kubectl replace -f $m --force
+  done
+  sleep 2
+  kubectl logs shell-operator -f
+}
+
+
+logs() {
+  kubectl logs shell-operator | jq -r 'select(.msg) | "\(.time) | \(.msg)"' | tail
+}
+
+print_log() {
+  STAMP=$(printf "0x%x" $(date "+%s%3N"))
+  d=$(date +"%F %T.%03N")
+  if [ $# -eq 0 ]; then
+      while read a; do print_log $a; done
+  else
+      echo "$d:[$STAMP] $@" >>$LOG_SCRIPT_FILE
+  fi
+}
+
+main $@
+

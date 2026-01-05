@@ -1,0 +1,39 @@
+\subsection{Model MAPE-K w systemach samozarządzających}
+
+Wzrost złożoności systemów rozproszonych sprawił, że tradycyjne, manualne metody zarządzania stały się niewystarczające. W odpowiedzi na to wyzwanie, firma IBM w 2001 roku sformułowała manifest \textbf{Informatyki Autonomicznej} (ang. \textit{\gls{autonomiccomputing}}), postulując tworzenie systemów zdolnych do samodzielnego zarządzania zgodnie z celami wysokiego poziomu określonymi przez administratora \cite{kephart2003vision}.
+
+Architekturą referencyjną dla takich systemów stał się model \gls{mapek}. Definiuje on strukturę komponentu zwanego \gls{autonomicmanager} (pol. Menedżer Autonomiczny), który steruje obiektem typu \gls{managedelement} (pol. Element Zarządzany) poprzez pętlę sprzężenia zwrotnego, oddzielając logikę sterowania od logiki biznesowej aplikacji \cite{ibm2006blueprint}.
+
+\subsubsection{Struktura pętli sterowania}
+
+Model \gls{mapek} składa się z czterech faz przetwarzania oraz centralnego komponentu wiedzy. Przepływ informacji w pętli realizowany jest sekwencyjnie, tworząc zamknięty cykl adaptacji.
+
+\begin{figure}[H]
+    \centering
+    % Upewnij się, że plik nazywa się mapek-ibm.png i jest w folderze img/
+    \includegraphics[width=0.8\textwidth]{mapek-ibm.png}
+    \caption{Architektura referencyjna pętli autonomicznej MAPE-K (Źródło: \cite{ibm2006blueprint}).}
+    \label{fig:mapek-model}
+\end{figure}
+
+Poszczególne komponenty pełnią następujące funkcje:
+
+\begin{enumerate}
+    \item \textbf{Monitor (Monitorowanie)}: Zbiera dane z komponentów typu \gls{sensors} systemu zarządzanego. Jego zadaniem jest agregacja, filtrowanie i wstępne przetwarzanie surowych danych (metryk, logów, zdarzeń) w celu skonstruowania spójnego obrazu stanu systemu. W środowisku Kubernetes rolę tę pełnią systemy takie jak Prometheus czy \gls{metricsserver} \cite{weyns2019introduction}.
+    
+    \item \textbf{Analyze (Analiza)}: Porównuje zebrany stan rzeczywisty ze stanem pożądanym lub modelami predykcyjnymi. Na tym etapie wykrywane są anomalie, naruszenia SLA oraz trendy wymagające reakcji. Analiza przekształca surowe dane w tzw. symptomy (ang. \textit{symptoms}), które sugerują konieczność podjęcia działań naprawczych.
+    
+    \item \textbf{Plan (Planowanie)}: Odpowiada za decyzyjność. Na podstawie wyników analizy generuje plan adaptacji – sekwencję kroków, które doprowadzą system do stanu pożądanego. Planowanie może opierać się na prostych regułach (If-Then), algorytmach optymalizacyjnych lub modelach AI. To tutaj zapada decyzja np. o tym, czy uruchomić skalowanie wertykalne (\gls{vpa}) czy horyzontalne (\gls{hpa}).
+    
+    \item \textbf{Execute (Wykonanie)}: Realizuje zaplanowane zmiany za pomocą komponentów typu \gls{effectors}. W Kubernetesie oznacza to zazwyczaj interakcję z \gls{api} serwerem w celu zmodyfikowania obiektów (np. zmiana liczby replik w obiekcie \gls{deployment}, aktualizacja limitów zasobów).
+    
+    \item \textbf{Knowledge (Wiedza)}: Centralne repozytorium współdzielone przez wszystkie fazy. Przechowuje dane historyczne, polityki zarządzania, modele systemu oraz topologię. Dzięki bazie wiedzy system może się "uczyć", dostosowując parametry analizy i planowania w oparciu o skuteczność wcześniejszych akcji \cite{garlan2004rainbow}.
+\end{enumerate}
+
+\subsubsection{Implementacja MAPE-K w orkiestratorach kontenerów}
+
+W kontekście niniejszej pracy, model \gls{mapek} stanowi teoretyczną podstawę dla projektowanego operatora hybrydowego (\textit{Smart Tuner}). Standardowe mechanizmy Kubernetesa realizują ten model w sposób uproszczony:
+\begin{itemize}
+    \item \textbf{\gls{hpa}} realizuje pętlę \gls{mapek}, gdzie Wiedzą jest bieżąca konfiguracja HPA, Monitorem jest Metrics API, Analizą jest porównanie użycia zasobów z celem (target), a Wykonaniem jest zmiana pola `replicas`.
+    \item \textbf{Projektowany Operator} rozszerza ten model, wprowadzając bardziej zaawansowaną fazę \textit{Analyze} (uwzględniającą błędy aplikacji i stabilność) oraz fazę \textit{Plan}, która wybiera między różnymi strategiami skalowania (\gls{hpa} vs \gls{vpa}), wykorzystując historyczną Bazę Wiedzy do uczenia się minimalnego zapotrzebowania na zasoby.
+\end{itemize}
