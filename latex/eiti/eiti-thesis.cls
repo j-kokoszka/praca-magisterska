@@ -107,6 +107,7 @@
 \RequirePackage{xkeyval}    % Keys and class parameters
 \RequirePackage{xspace}     % Remove duplicated spaces
 \RequirePackage{csquotes}
+\RequirePackage{booktabs}
 
 %--------------------------------------
 % PdfTeX specific configuration

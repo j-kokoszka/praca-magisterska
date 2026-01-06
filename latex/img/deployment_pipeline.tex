@@ -1,0 +1,76 @@
+\begin{tikzpicture}[
+    % Ustawienia odstępów
+    node distance=1.2cm and 1.0cm,
+    auto,
+    % Styl bloków
+    block/.style={
+        rectangle,
+        draw=black,
+        thick,
+        fill=white,
+        text width=2.8cm,
+        text centered,
+        rounded corners,
+        minimum height=2cm,
+        font=\footnotesize\sffamily
+    },
+    % Styl linii
+    line/.style={
+        draw,
+        -latex,
+        thick,
+        gray!80
+    },
+    % Styl etykiet
+    label_text/.style={
+        midway,
+        font=\scriptsize\itshape,
+        align=center,
+        color=black!70,
+        fill=white,      % Dodano tło dla czytelności, jeśli przetnie linię
+        inner sep=2pt
+    }
+]
+
+    % --- RZĄD 1 (Góra) ---
+    \node [block, fill=orange!10] (gitlab) {
+        \textbf{1. GitLab}\\
+        \textit{(Commit State)}\\[0.3em]
+        Repozytorium kodu
+    };
+
+    \node [block, right=of gitlab, fill=blue!5] (infra) {
+        \textbf{2. OpenTofu}\\
+        \textbf{\& Proxmox}\\
+        \textit{(HCL State)}\\[0.3em]
+        Wdrażanie VM
+    };
+
+    \node [block, right=of infra, fill=yellow!10] (k3s) {
+        \textbf{3. Ansible \& K3s}\\
+        \textit{(Cluster Setup)}\\[0.3em]
+        Instalacja K8s
+    };
+
+    % --- RZĄD 2 (Dół) ---
+    \node [block, below=of k3s, fill=cyan!5] (flux_boot) {
+        \textbf{4. Flux Bootstrap}\\
+        \textit{(Deploy Operators)}\\[0.3em]
+        Inicjalizacja GitOps
+    };
+
+    \node [block, left=of flux_boot, fill=cyan!10] (flux_sync) {
+        \textbf{5. Flux Reconciliation}\\
+        \textit{(Helm \& Kustomize)}\\[0.3em]
+        Synchronizacja aplikacji
+    };
+
+    % --- POŁĄCZENIA ---
+    \path [line] (gitlab) -- (infra);
+    \path [line] (infra) -- (k3s);
+    \path [line] (k3s) -- (flux_boot);
+    \path [line] (flux_boot) -- (flux_sync);
+    
+    \path [line, dashed, rounded corners] (flux_sync.west) -| node [label_text, pos=0.3] {Monitorowanie zmian} (gitlab.south);
+
+\end{tikzpicture}

@@ -16,6 +16,7 @@ main.synctex.gz
 *.synctex.gz
 *.dvi
 
+*.gz
 # --- Bibliografia (Biber/Biblatex) ---
 *.bbl
 *.blg
