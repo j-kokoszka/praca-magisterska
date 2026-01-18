@@ -1,0 +1,130 @@
+\begin{tikzpicture}[
+    node distance=0.5cm,
+    % Styl dla głównych warstw (duże kontenery)
+    layer/.style={
+        rectangle,
+        draw=gray!40,
+        thick,
+        fill=white,
+        rounded corners,
+        inner sep=10pt,
+        align=center
+    },
+    % Styl dla etykiet warstw (po lewej stronie)
+    layer_label/.style={
+        rotate=90,
+        anchor=center,
+        font=\sffamily\bfseries\small,
+        color=gray!70
+    },
+    % Styl dla komponentów wewnątrz (aplikacje, vm)
+    component/.style={
+        rectangle,
+        draw=black!60,
+        thick,
+        fill=white,
+        minimum height=1.2cm,
+        minimum width=2.5cm,
+        text centered,
+        rounded corners=2pt,
+        font=\footnotesize\sffamily,
+        drop shadow
+    },
+    % Strzałki relacji "Runs on"
+    runs_on/.style={
+        draw,
+        -latex,
+        thick,
+        gray!50,
+        dashed
+    }
+]
+
+    % --- 1. WARSTWA APLIKACJI (GÓRA) ---
+    
+    % Grupa: System Sterowania (Management)
+    \node[component, fill=red!10, text width=2.2cm] (tuner) {
+        \textbf{Smart Tuner}\\
+        (MAPE-K)
+    };
+    
+    \node[component, right=0.5cm of tuner, fill=red!5, text width=2.2cm] (scalers) {
+        \textbf{Scalers}\\
+        (HPA, VPA)
+    };
+
+    % Grupa: Monitoring
+    \node[component, right=0.5cm of scalers, fill=blue!10, text width=2.2cm] (monitor) {
+        \textbf{Monitoring}\\
+        (Prometheus)
+    };
+
+    % Grupa: Workload
+    \node[component, right=0.5cm of monitor, fill=green!10, text width=2.2cm] (app) {
+        \textbf{Workload}\\
+        (FastAPI)
+    };
+
+    % Kontener warstwy aplikacji
+    \node[layer, fit=(tuner)(scalers)(monitor)(app), label={[anchor=north west, inner sep=5pt]north west:\textit{Warstwa Aplikacji}}] (app_layer) {};
+    \node[layer_label, left=0.2cm of app_layer] {Workloads};
+
+
+    % --- 2. WARSTWA ORKIESTRACJI (K3S) ---
+    
+    \node[layer, below=0.8cm of app_layer, minimum width=11.5cm, fill=yellow!10, label={[anchor=north west]north west:\textit{Warstwa Orkiestracji}}] (k3s_layer) {
+        \vspace{0.3cm}
+        \textbf{K3s Kubernetes Cluster} (v1.33)\\
+        \footnotesize{CNI: Flannel \quad | \quad CSI: Local Path}
+    };
+    \node[layer_label, left=0.2cm of k3s_layer] {K3s};
+
+
+    % --- 3. WARSTWA MASZYN WIRTUALNYCH ---
+    
+    % Definiujemy 3 VM-ki pod spodem
+    
+    % POPRAWKA: Zmieniono 'width' na 'text width'
+    \node[component, below=1.0cm of k3s_layer, xshift=-3.5cm, fill=blue!5, text width=3cm] (vm1) {
+        \textbf{VM-01}\\
+        (Control Plane)
+    };
+    
+    % POPRAWKA: Zmieniono 'width' na 'text width'
+    \node[component, right=0.8cm of vm1, fill=blue!5, text width=3cm] (vm2) {
+        \textbf{VM-02}\\
+        (Worker)
+    };
+    
+    % POPRAWKA: Zmieniono 'width' na 'text width'
+    \node[component, right=0.8cm of vm2, fill=blue!5, text width=3cm] (vm3) {
+        \textbf{VM-03}\\
+        (Worker)
+    };
+
+    % Kontener warstwy VM
+    \node[layer, fit=(vm1)(vm2)(vm3), label={[anchor=north west]north west:\textit{Warstwa Wirtualizacji}}] (vm_layer) {};
+    \node[layer_label, left=0.2cm of vm_layer] {VMs};
+
+
+    % --- 4. WARSTWA SPRZĘTOWA (PROXMOX) ---
+    
+    \node[layer, below=0.6cm of vm_layer, minimum width=11.5cm, fill=gray!10, label={[anchor=north west]north west:\textit{Warstwa Infrastruktury}}] (proxmox_layer) {
+        \vspace{0.2cm}
+        \textbf{Proxmox VE Hypervisor}\\
+        \footnotesize{Zasoby Fizyczne: CPU, RAM, SSD}
+    };
+    \node[layer_label, left=0.2cm of proxmox_layer] {Hardware};
+
+
+    % --- STRZAŁKI RELACJI ---
+    
+    \draw[runs_on] (app_layer.south) -- node[right, font=\tiny] {Hostowane w} (k3s_layer.north);
+    
+    \draw[runs_on] (k3s_layer.south -| vm1.north) -- (vm1.north);
+    \draw[runs_on] (k3s_layer.south -| vm2.north) -- (vm2.north);
+    \draw[runs_on] (k3s_layer.south -| vm3.north) -- (vm3.north);
+
+    \draw[runs_on] (vm_layer.south) -- node[right, font=\tiny] {Wirtualizacja} (proxmox_layer.north);
+
+\end{tikzpicture}

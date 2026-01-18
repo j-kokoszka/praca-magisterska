@@ -1,2 +1,50 @@
 temp/**/*
 out/**/*
+main.pdf
+main.synctex.gz
+
+
+# --- Główne pliki tymczasowe LaTeX ---
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.dvi
+*-SAVE-ERROR
+
+*.gz
+# --- Bibliografia (Biber/Biblatex) ---
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+
+# --- Glosariusz i Akronimy (ważne dla Twojej pracy!) ---
+*.acn
+*.acr
+*.alg
+*.glo
+*.gls
+*.glg
+*.ist
+
+# --- Specyficzne dla Twojego szablonu pracy ---
+*.app
+*.maf
+*.mtc*
+*.ptc
+
+# --- Wynikowy PDF (zazwyczaj nie wersjonujemy PDF-a, chyba że finalny) ---
+*.pdf
+
+# --- Edytory i system ---
+.DS_Store
+*.swp
+*~
+
+

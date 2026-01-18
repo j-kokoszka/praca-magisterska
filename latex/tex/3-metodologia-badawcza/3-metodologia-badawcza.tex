@@ -2,22 +2,79 @@
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
+% \section{Metodologia Badawcza}
+% Niniejszy rozdział poświęcony jest szczegółowemu opisowi metodologii badawczej przyjętej w pracy magisterskiej. 
+% Celem jest zapewnienie transparentności i powtarzalności przeprowadzonych eksperymentów, a także umożliwienie 
+% obiektywnej oceny uzyskanych wyników. Zaprezentowana metodologia stanowi kompleksowe podejście do weryfikacji 
+% postawionych hipotez badawczych oraz odpowiedzi na zdefiniowane problemy. Rozdział rozpoczyna się od precyzyjnego 
+% sformułowania problemu badawczego i szczegółowych pytań badawczych, które wyznaczają kierunek empirycznej części 
+% pracy. Następnie omówione zostaną kluczowe aspekty projektowania eksperymentów, w tym wybór odpowiednich metryk, 
+% scenariuszy obciążenia oraz specyfika środowiska testowego. Całość ma na celu stworzenie solidnych ram dla 
+% rzetelnej analizy wydajności i efektywności autonomicznych pętli sterowania w środowisku Kubernetes.
+% 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% 
+% \input{tex/3-metodologia-badawcza/3.1-sformulowanie-problemu-badawczego}
+% 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% 
+% \input{tex/3-metodologia-badawcza/3.2-srodowisko-testowe}
+% 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% 
+% \input{tex/3-metodologia-badawcza/3.3-projektowanie-eksperymentow}
+% 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% 
+% \input{tex/3-metodologia-badawcza/3.4-metody-analizy-danych}
+% 
+
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 \section{Metodologia Badawcza}
-Niniejszy rozdział poświęcony jest szczegółowemu opisowi metodologii badawczej przyjętej w pracy magisterskiej. Celem jest zapewnienie transparentności i powtarzalności przeprowadzonych eksperymentów, a także umożliwienie obiektywnej oceny uzyskanych wyników. Zaprezentowana metodologia stanowi kompleksowe podejście do weryfikacji postawionych hipotez badawczych oraz odpowiedzi na zdefiniowane problemy. Rozdział rozpoczyna się od precyzyjnego sformułowania problemu badawczego i szczegółowych pytań badawczych, które wyznaczają kierunek empirycznej części pracy. Następnie omówione zostaną kluczowe aspekty projektowania eksperymentów, w tym wybór odpowiednich metryk, scenariuszy obciążenia oraz specyfika środowiska testowego. Całość ma na celu stworzenie solidnych ram dla rzetelnej analizy wydajności i efektywności autonomicznych pętli sterowania w środowisku Kubernetes.
+
+Niniejszy rozdział stanowi szczegółowy opis metodyki przyjętej w procesie weryfikacji hipotez badawczych postawionych 
+w pracy. Ze względu na charakter zagadnienia, obejmujący analizę wydajności systemów rozproszonych, jako główną metodę 
+badawczą przyjęto \textbf{eksperyment kontrolowany} w środowisku rzeczywistym (ang. \textit{testbed}), zgodnie ze 
+standardami eksperymentacji w inżynierii oprogramowania \cite{wohlin2012experimentation}. Celem przyjętego podejścia 
+jest zapewnienie transparentności, rzetelności oraz -- co kluczowe w badaniach nad systemami chmurowymi -- 
+\textbf{powtarzalności} przeprowadzonych testów (ang. \textit{reproducibility}).
+
+W rozdziale zdefiniowano ramy eksperymentalne niezbędne do obiektywnego porównania referencyjnych mechanizmów orkiestratora 
+\gls{k8s} (\acrshort{hpa}, \acrshort{vpa}, \acrshort{keda}) z projektowanym rozwiązaniem autorskim, opartym na pętli 
+autonomicznej \acrshort{mapek}. Metodologia opiera się na ilościowej analizie metryk systemowych oraz jakościowej ocenie 
+stabilności procesów adaptacyjnych, czerpiąc z dobrych praktyk analizy wydajności systemów komputerowych \cite{jain1991art}.
+
+Struktura rozdziału odzwierciedla logiczny ciąg procesu badawczego:
+\begin{enumerate}
+    \item \textbf{Sformułowanie problemu} (Sekcja \ref{sec:problem}) -- precyzyjne określenie pytań badawczych determinujących 
+      przebieg eksperymentów.
+    \item \textbf{Środowisko testowe} (Sekcja \ref{sec:env}) -- charakterystyka infrastruktury sprzętowej i programowej, 
+      przygotowanej zgodnie z paradygmatem \gls{iac}.
+    \item \textbf{Projektowanie eksperymentów} (Sekcja \ref{sec:design}) -- definicja scenariuszy obciążenia, dobór metryk 
+      ewaluacyjnych (\gls{qos}, utylizacja zasobów) oraz opis instrumentarium pomiarowego.
+    \item \textbf{Metody analizy} (Sekcja \ref{sec:analysis}) -- opis aparatu statystycznego wykorzystanego do interpretacji 
+      zgromadzonych danych.
+\end{enumerate}
+
+Takie ujęcie pozwala na systematyczną ewaluację efektywności autonomicznych pętli sterowania i stanowi fundament dla analizy wyników przedstawionej w kolejnych częściach pracy.
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 \input{tex/3-metodologia-badawcza/3.1-sformulowanie-problemu-badawczego}
+\label{sec:problem}
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 \input{tex/3-metodologia-badawcza/3.2-srodowisko-testowe}
+\label{sec:env}
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 \input{tex/3-metodologia-badawcza/3.3-projektowanie-eksperymentow}
+\label{sec:design}
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 \input{tex/3-metodologia-badawcza/3.4-metody-analizy-danych}
-
+\label{sec:analysis}

@@ -7,12 +7,168 @@
     description={Lekka, przenośna i skalowalna jednostka, która zawiera oprogramowanie oraz jego zależności.}
 }
 
-\newglossaryentry{kubernetes}{
-    name={Kubernetes},
-    description={Otwarte oprogramowanie do zarządzania \gls{kontener}ami}
+\newglossaryentry{kubernetes}
+{
+    name=Kubernetes,
+    description={Otwartoźródłowa platforma do zarządzania, automatyzacji i skalowania aplikacji kontenerowych}
 }
 
 
+\newglossaryentry{controlplane}{
+    name={Control Plane},
+    description={Warstwa sterująca klastra Kubernetes, odpowiedzialna za zarządzanie stanem klastra, planowanie zadań i wykrywanie oraz reagowanie na zdarzenia w klastrze}
+}
+
+\newglossaryentry{workernode}{
+    name={Worker Node},
+    description={Węzeł roboczy w klastrze Kubernetes; maszyna fizyczna lub wirtualna, na której uruchamiane są Pody z aplikacjami użytkownika}
+}
+
+\newglossaryentry{pod}{
+    name={Pod},
+    description={Najmniejsza i najprostsza jednostka w modelu obiektowym Kubernetesa, którą można utworzyć lub wdrożyć. Pod reprezentuje pojedynczą instancję działającego procesu w klastrze}
+}
+
+\newglossaryentry{deployment}{
+    name={Deployment},
+    description={Obiekt API Kubernetesa, który zarządza replikowanymi aplikacjami, umożliwiając deklaratywne aktualizacje Podów i ReplicaSetów}
+}
+
+\newglossaryentry{service}{
+    name={Service},
+    description={Abstrakcja definiująca logiczny zbiór Podów oraz politykę dostępu do nich (często nazywaną mikroserwisem)}
+}
+
+\newglossaryentry{operator}{
+    name={Operator},
+    description={Metoda pakowania, wdrażania i zarządzania aplikacją Kubernetes, wykorzystująca niestandardowe zasoby (CRD) do zautomatyzowania zadań administracyjnych}
+}
+
+\newglossaryentry{metricsserver}{
+    name={Metrics Server},
+    description={Komponent klastra Kubernetes zbierający metryki zużycia zasobów (CPU, RAM) z poszczególnych węzłów i udostępniający je poprzez Metrics API}
+}
+
+\newglossaryentry{admissioncontroller}{
+    name={Admission Controller},
+    description={Fragment kodu, który przechwytuje żądania do serwera API Kubernetes przed utrwaleniem obiektu, ale po uwierzytelnieniu i autoryzacji. Może walidować (Validating) lub modyfikować (Mutating) obiekty}
+}
+
+\newglossaryentry{scaler}{
+    name={Scaler},
+    description={W terminologii KEDA: komponent definiujący logikę połączenia z konkretnym źródłem zdarzeń (np. Kafka, Prometheus) i metodę pobierania z niego metryki decydującej o skalowaniu}
+}
+
+\newglossaryentry{scaledobject}{
+    name={ScaledObject},
+    description={Niestandardowy zasób (CRD) wprowadzany przez KEDA, służący do konfiguracji automatycznego skalowania dla konkretnego wdrożenia (Deployment) w oparciu o zdefiniowane triggery}
+}
+
+\newglossaryentry{autonomicmanager}{
+    name={Autonomic Manager},
+    description={Komponent oprogramowania, który implementuje pętlę sterowania (MAPE-K) w celu zarządzania zasobem lub systemem bez interwencji człowieka}
+}
+
+\newglossaryentry{managedelement}{
+    name={Managed Element},
+    description={Element systemu (sprzęt lub oprogramowanie), który jest kontrolowany przez menedżera autonomicznego. W Kubernetesie jest to zazwyczaj Pod, Deployment lub Node}
+}
+
+\newglossaryentry{sensors}{
+    name={Sensory},
+    description={Interfejsy umożliwiające menedżerowi pobieranie informacji o stanie elementu zarządzanego (np. eksportery metryk w Prometheusie)}
+}
+
+\newglossaryentry{effectors}{
+    name={Efektory},
+    description={Interfejsy umożliwiające menedżerowi wprowadzanie zmian w elemencie zarządzanym (np. API Kubernetesa pozwalające na zmianę konfiguracji)}
+}
+
+\newglossaryentry{autonomiccomputing}{
+    name={Autonomic Computing},
+    description={Paradygmat systemów komputerowych zdolnych do samodzielnego zarządzania (samokonfiguracji, samoleczenia, samooptymalizacji i samoobrony) przy minimalnej interwencji człowieka}
+}
+
+% (Opcjonalnie, jeśli używasz w innym miejscu)
+\newglossaryentry{feedbackloop}{
+    name={Pętla sprzężenia zwrotnego},
+    description={Mechanizm sterowania, w którym wyjście systemu jest mierzone i porównywane z wartością zadaną w celu wygenerowania sygnału sterującego minimalizującego błąd}
+}
+
+
+% W sekcji Glosariusza (jeśli używasz)
+\newglossaryentry{thrashing}
+{
+    name=Thrashing,
+    description={Zjawisko w systemach komputerowych, w którym zasoby są marnowane na ciągłe przełączanie kontekstu lub rekonfigurację (np. ciągłe skalowanie w górę i w dół) zamiast na wykonywanie użytecznej pracy}
+}
+
+\newglossaryentry{flash_crowd}
+{
+    name=Flash Crowd,
+    description={Nagły, gwałtowny i często nieprzewidywalny wzrost ruchu sieciowego skierowanego do usługi, często prowadzący do przeciążenia zasobów}
+}
+
+\newglossaryentry{overhead}
+{
+    name=Narzut (Overhead),
+    description={Dodatkowe zasoby obliczeniowe lub czasowe wymagane do wykonywania zadań zarządzania (np. monitorowania, podejmowania decyzji), które nie wynikają bezpośrednio z logiki biznesowej aplikacji}
+}
+
+% Glosariusz
+\newglossaryentry{proxmox}
+{
+    name=Proxmox VE,
+    description={Otwartoźródłowa platforma do zarządzania wirtualizacją serwerów, integrująca hiperwizor KVM i kontenery LXC}
+}
+
+\newglossaryentry{terraform}
+{
+    name=Terraform,
+    description={Narzędzie typu open-source do tworzenia, zmieniania i wersjonowania infrastruktury w sposób bezpieczny i efektywny (IaC)}
+}
+
+\newglossaryentry{ansible}
+{
+    name=Ansible,
+    description={Narzędzie do automatyzacji oprogramowania, zarządzania konfiguracją i wdrażania aplikacji}
+}
+
+\newglossaryentry{fluxcd}
+{
+    name=FluxCD,
+    description={Narzędzie realizujące podejście GitOps dla platformy Kubernetes, zapewniające ciągłą synchronizację stanu klastra z repozytorium Git}
+}
+
+\newglossaryentry{k6}
+{
+    name=k6,
+    description={Nowoczesne narzędzie do testowania obciążeniowego typu open-source, umożliwiające pisanie skryptów testowych w języku JavaScript}
+}
+
+\newglossaryentry{ubuntu}
+{
+    name=Ubuntu,
+    description={Popularna dystrybucja systemu Linux oparta na Debianie, szeroko stosowana w środowiskach chmurowych}
+}
+
+\newglossaryentry{k3s}
+{
+    name=k3s,
+    description={Lekka, certyfikowana dystrybucja Kubernetesa zaprojektowana z myślą o środowiskach IoT i Edge Computing, charakteryzująca się niskim zapotrzebowaniem na zasoby}
+}
+
+\newglossaryentry{flannel}
+{
+    name=Flannel,
+    description={Prosta i lekka nakładka sieciowa (network overlay) dla Kubernetesa, realizująca model CNI}
+}
+
+\newglossaryentry{gitops}
+{
+    name=GitOps,
+    description={Model operacyjny dla aplikacji cloud-native, w którym repozytorium Git stanowi "jedyne źródło prawdy" dla infrastruktury i aplikacji}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -23,13 +179,21 @@
 \newacronym{vpa}{VPA}{Vertical Pod Autoscaler}
 \newacronym{hpa}{HPA}{Horizontal Pod Autoscaler}
 \newacronym{keda}{KEDA}{Kubernetes Event-driven Autoscaling}
-\newacronym{mapek}{MAPE-K}{Monitor, Analyze, Plan, Execute, Knowledge}
 \newacronym{crd}{CRD}{Custom Resource Definition}
-\newacronym{iac}{IaC}{Infrastructure as a Code}
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{rest}{REST}{Representational State Transfer}
 \newacronym{cni}{CNI}{Container Network Interface}
 \newacronym{cicd}{CI/CD}{Continuous Integration / Continuous Delivery}
-
 \newacronym{mape}{MAPE}{Monitor, Analyze, Plan and Execute}
 \newacronym{focale}{FOCALE}{Foundation - Observe - Compare - Act - Learn - rEason}
 \newacronym{ooda}{OODA}{Observe-Orient-Decide-Act}
 \newacronym{cladra}{CLADRA}{Closed Loop Anomaly Detection and Resolution Automation}
+\newacronym{sla}{SLA}{Service Level Agreement}
+\newacronym{k8s}{K8s}{Kubernetes}
+\newacronym{mapek}{MAPE-K}{Monitor-Analyze-Plan-Execute-Knowledge}
+\newacronym{iac}{IaC}{Infrastructure as Code}
+\newacronym{qos}{QoS}{Quality of Service}
+
+\newacronym{vm}{VM}{Virtual Machine}
+\newacronym{cncf}{CNCF}{Cloud Native Computing Foundation}
+

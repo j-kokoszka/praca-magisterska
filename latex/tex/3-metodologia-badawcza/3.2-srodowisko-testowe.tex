@@ -1,80 +1,101 @@
 \subsection{Środowisko testowe}
+\label{subsec:srodowisko_testowe}
+
+Zapewnienie wiarygodności wyników eksperymentalnych wymagało przygotowania izolowanego i deterministycznego środowiska 
+badawczego. Architektura systemu testowego została zaprojektowana zgodnie z paradygmatem \gls{iac}, co pozwoliło na 
+pełną automatyzację procesu powoływania infrastruktury oraz zagwarantowało powtarzalność 
+konfiguracji \cite{hinschner2018infrastructure}.
 
 \subsubsection{Warstwa wirtualizacji i sprzętu}
-W celu przeprowadzenia badań oraz weryfikacji przyjętych założeń projektowych przygotowano 
-dedykowane środowisko testowe. Infrastruktura została zaprojektowana w oparciu o paradygmat 
-\gls{iac}, co zapewnia powtarzalność procesu wdrażania oraz spójność konfiguracji.
-Jako platformę bazową wykorzystano środowisko wirtualizacji Proxmox. Na jego potrzeby 
-powołano klaster składający się z trzech maszyn wirtualnych o identycznej specyfikacji 
-sprzętowej. Każdy z węzłów dysponuje następującymi zasobami:
-\begin{itemize}
-    \item Procesor (vCPU): 4 rdzenie, \item Pamięć operacyjna (RAM): 8 GB,
-    \item Przestrzeń dyskowa: 100 GB.
-\end{itemize}
 
-Proces powoływania maszyn wirtualnych oraz konfiguracja warstwy sprzętowej zostały 
-zautomatyzowane przy użyciu narzędzia Terraform.
+Jako warstwę abstrakcji sprzętowej wykorzystano platformę wirtualizacji typu \textit{Type-1 Hypervisor} -- \gls{proxmox}.
+Na jej bazie utworzono klaster składający się z trzech maszyn wirtualnych (\gls{vm}), pełniących rolę węzłów obliczeniowych.
+Specyfikacja zasobów przydzielonych poszczególnym węzłom została ujednolicona w celu eliminacji asymetrii wydajnościowej 
+(szczegóły w Tabeli \ref{tab:srodowisko_testowe}).
+
+Proces powoływania maszyn wirtualnych zrealizowano przy użyciu narzędzia \gls{terraform}, wykorzystując providera 
+\textit{Telmate/proxmox}. Pozwoliło to na definicję całej infrastruktury w formie kodu deklaratywnego, co jest kluczowe 
+dla zachowania spójności środowiska w cyklu badawczym.
 
 \subsubsection{System operacyjny i orkiestracja}
-Na wszystkich węzłach zainstalowano system operacyjny Ubuntu 24.04 LTS. Stanowi on bazę 
-dla klastra Kubernetes, który został wdrożony przy użyciu lekkiej dystrybucji k3s w wersji 
-\texttt{v1.33.2+k3s1}.
 
-Instalacja oraz wstępna konfiguracja klastra zostały zrealizowane za pomocą narzędzia do 
-zarządzania konfiguracją Ansible, z wykorzystaniem roli \texttt{k3s-ansible} dostępnej w 
-repozytorium \footnote{\url{https://github.com/k3s-io/k3s-ansible}}. W ramach warstwy 
-sieciowej klastra \gls{cni} zastosowano domyślne rozwiązanie dla k3s, czyli Flannel, co 
-zapewnia stabilną komunikację między podami wewnątrz klastra.
+Fundamentem programowym węzłów jest system operacyjny \gls{ubuntu} w wersji 24.04 LTS. Wybór ten podyktowany był 
+długoterminowym wsparciem producenta oraz szeroką kompatybilnością z narzędziami konteneryzacji. Jako orkiestrator 
+kontenerów wybrano dystrybucję \gls{k3s} (wersja \texttt{v1.33.2+k3s1}), certyfikowaną przez \gls{cncf}. Decyzja o 
+użyciu \gls{k3s} zamiast pełnowymiarowego Kubernetesa wynikała z konieczności minimalizacji narzutu zasobowego 
+(ang. \textit{resource footprint}) samej platformy, co pozwala na precyzyjniejszy pomiar wydajności badanych 
+algorytmów skalowania.
 
-Zarządzanie cyklem życia aplikacji oraz konfiguracją klastra odbywa się zgodnie z podejściem 
-GitOps. Kluczowym elementem tej architektury jest narzędzie FluxCD, które stale monitoruje 
-repozytorium kodu i automatycznie synchronizuje stan klastra z definicjami zawartymi w 
-systemie kontroli wersji.
+Konfiguracja klastra na poziomie systemu operacyjnego została zautomatyzowana za pomocą narzędzia \gls{ansible}, 
+z wykorzystaniem roli \texttt{k3s-ansible}. Warstwę sieciową (\gls{cni}) oparto o rozwiązanie \gls{flannel}, 
+zapewniające wydajny routing pakietów VXLAN między podami.
 
-Proces dostarczania oprogramowania wspierany jest przez przygotowane potoki \gls{cicd},
-które odpowiadają za budowanie, testowanie oraz przygotowanie manifestów wdrożeniowych. 
-Takie podejście pozwoliło na pełną automatyzację procesu wdrażania kolejnych zasobów i 
-usług w środowisku badawczym.
+Zarządzanie cyklem życia aplikacji testowych oraz konfiguracją komponentów klastra (w tym badanych mechanizmów 
+\gls{vpa}, \gls{hpa}, \gls{keda}) realizowane jest w modelu \gls{gitops}. Kluczowym komponentem jest tu kontroler 
+\gls{fluxcd}, który w pętli kontrolnej synchronizuje stan klastra z repozytorium kodu, eliminując ryzyko tzw. dryfu 
+konfiguracji (ang. \textit{configuration drift}).
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \caption{Specyfikacja techniczna środowiska eksperymentalnego}
     \label{tab:srodowisko_testowe}
     \vspace{0.3cm}
     \begin{tabular}{@{}ll@{}}
-        %\toprule
-        \textbf{Kategoria} & \textbf{Komponent / Specyfikacja} \\
-        %\midrule
-        Platforma wirtualizacji & Proxmox \\
-        Automatyzacja infrastruktury & Terraform \\
-        Konfiguracja systemu & Ansible (\texttt{k3s-ansible}) \\
-        %\midrule
-        Liczba węzłów & 3 maszyny wirtualne \\
-        Zasoby węzła & 4 vCPU, 8 GB RAM, 100 GB HDD \\
+        \toprule
+        \textbf{Kategoria} & \textbf{Komponent / Parametr} \\
+        \midrule
+        \textbf{Infrastruktura} & \\
+        Hypervisor & Proxmox VE \\
+        Provisioning & Terraform \\
+        Liczba węzłów & 3 $\times$ VM \\
+        Zasoby węzła (per VM) & 4 vCPU, 8 GB RAM, 100 GB SSD \\
         System operacyjny & Ubuntu 24.04 LTS \\
-        %\midrule
+        \midrule
+        \textbf{Platforma} & \\
         Orkiestrator & k3s (\texttt{v1.33.2+k3s1}) \\
         Sieć (CNI) & Flannel \\
-        Model wdrażania & GitOps (FluxCD) \\
-        %\midrule
-        Narzędzie obciążające & k6 (uruchamiane zewnętrznie) \\
-        Metodyka testów & Generowanie ruchu HTTP z konsoli lokalnej \\
-        %\bottomrule
+        Konfiguracja & Ansible \\
+        CI/CD / GitOps & FluxCD \\
+        \midrule
+        \textbf{Testy} & \\
+        Generator obciążenia & k6 (uruchamiany na stacji roboczej) \\
+        Protokół & HTTP/1.1 \\
+        \bottomrule
     \end{tabular}
 \end{table}
 
-\subsubsection{Instrumentarium badawcze i narzędzia pomiarowe}
-W celu realizacji testów wydajnościowych oraz weryfikacji stabilności klastra pod obciążeniem,
-zastosowano dedykowane narzędzia do generowania ruchu sieciowego.
+\subsubsection{Instrumentarium badawcze i generowanie ruchu}
 
-Jako generator obciążenia wykorzystano narzędzie \textbf{k6}, które służy do przeprowadzania 
-testów wydajnościowych. Skrypty testowe k6, przygotowane w języku JavaScript, są uruchamiane 
-lokalnie z konsoli na stanowisku roboczym, a generowane przez nie żądania HTTP kierowane są 
-na zewnątrz klastra Kubernetes, co realistycznie symuluje ruch pochodzący od zewnętrznych 
-użytkowników. Taka metodyka pozwala na mierzenie kluczowych metryk z perspektywy klienta, w 
-tym opóźnień (\textit{latency}), przepustowości (\textit{throughput}) oraz wskaźnika błędów.
+W celu symulacji realistycznych wzorców obciążenia (opisanych szerzej w Sekcji \ref{sec:design}) wykorzystano narzędzie 
+\gls{k6}. Wybrana metodyka zakłada generowanie ruchu z poziomu zewnętrznej stacji roboczej (niebędącej częścią klastra), 
+co zapobiega zjawisku ,,zanieczyszczenia pomiaru'' (ang. \textit{measurement pollution}), gdzie generator obciążenia 
+konkurowałby o zasoby z badaną aplikacją.
 
-Dane obciążeniowe kierowane są na docelową aplikację testową, która została zaprojektowana 
-specjalnie na potrzeby pracy magisterskiej. Architektura i specyfikacja tej aplikacji zostały 
-szczegółowo opisane w kolejnej sekcji dotyczącej eksperymentów.
+Skrypty testowe zaimplementowane w języku JavaScript realizują scenariusze \textit{stress testing} oraz 
+\textit{spike testing}, kierując żądania HTTP do punktu wejścia klastra (Ingress Controller).
+Zastosowane instrumentarium umożliwia precyzyjny pomiar metryk \gls{qos} z perspektywy klienta końcowego, w tym:
+\begin{itemize}
+    \item opóźnienia żądań (metryka \texttt{http\_req\_duration}),
+    \item przepustowości (metryka \texttt{http\_reqs/s}),
+    \item stopy błędów (metryka \texttt{http\_req\_failed}).
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \resizebox{\textwidth}{!}{ % Skaluje diagram do szerokości tekstu
+        \input{img/deployment_pipeline.tex}
+    }
+    \caption{Schemat przepływu wdrażania środowiska testowego (GitOps).}
+    \label{fig:deployment_pipeline}
+\end{figure}
+
+% \begin{figure}[ht]
+%     \centering
+%     \resizebox{\textwidth}{!}{ % Skalowanie do szerokości strony
+%         \input{img/architecture_layers.tex}
+%     }
+%     \caption{Diagram warstwowy architektury rozwiązania badawczego.}
+%     \label{fig:architecture_layers}
+% \end{figure}
+
 

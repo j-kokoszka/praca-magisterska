@@ -12,8 +12,7 @@ export let options = {
 };
 
 export default function () {
-    let cpuRes = http.get(`${BASE_URL}/cpu?loops=1000`);
+    let cpuRes = http.get(`${BASE_URL}/cpu?loops=100`);
     check(cpuRes, { 'cpu 200': (r) => r.status === 200 });
 
 }
-
