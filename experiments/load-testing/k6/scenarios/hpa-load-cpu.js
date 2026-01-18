@@ -1,9 +1,9 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'https://workload-app-vpa.mgr.kokoszka.cloud';
-const VUS = __ENV.VUS || 100;
-const DURATION = __ENV.DURATION || '60s';
+const BASE_URL = __ENV.BASE_URL || 'https://workload-app-hpa.mgr.kokoszka.cloud';
+const VUS = __ENV.VUS || 200;
+const DURATION = __ENV.DURATION || '120s';
 
 export let options = {
     vus: parseInt(VUS),

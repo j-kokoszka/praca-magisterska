@@ -5,7 +5,7 @@ import { check, sleep } from 'k6';
  * Konfiguracja (ENV)
  * ========================= */
 const BASE_URL   = __ENV.BASE_URL   || 'https://workload-app.mgr.kokoszka.cloud';
-const RPS        = parseInt(__ENV.RPS || '300');
+const RPS        = parseInt(__ENV.RPS || '3000');
 const DURATION   = __ENV.DURATION   || '2m';
 
 const CPU_MS     = parseInt(__ENV.CPU_MS || '1000');
